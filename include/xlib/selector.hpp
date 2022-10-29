@@ -2,6 +2,7 @@
 #include <map>
 #include <string>
 #include "display/lvgl.h"
+#include "autonomous.hpp"
 
 namespace xlib {
     void None();
@@ -10,10 +11,10 @@ namespace xlib {
         lv_obj_t * createBtn(lv_obj_t * parent, lv_coord_t x, lv_coord_t y, lv_coord_t width, lv_coord_t height, const char * title, bool isHidden);
 
         //Declares function pointers to hold the call to auton functions
-        void (*grabL) (){&None}, (*grabR) (){&None}, (*winPointL) (){&None},
-                        (*winPointR) (){&None}, (*fullL) (){&None},
+        void (*grabL) (){&None}, (*grabR) (){&None}, (*winPointL) (){&WPL},
+                        (*winPointR) (){&WPR}, (*fullL) (){&None},
                         (*fullR) (){&None}, (*rTall) (){&None}, (*dGrab) (){&None},
-                        (*wP) (){&None}, (*skills_t) (){&None}, (*none) (){&None};
+                        (*wP) (){&None}, (*skills_t) (){&Skills}, (*none) (){&None};
         
 
 
@@ -52,7 +53,7 @@ namespace xlib {
                                     {rightTall, rTall}, {doubleGrab, dGrab} };
         
         
-        int auton = 0;
+        //int auton = 0;
 
 
         void (*autonToRun) (){};

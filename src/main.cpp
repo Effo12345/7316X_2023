@@ -1,10 +1,13 @@
 #include "main.h"
 
+//Boolean flags for use in driver control
 bool fwToggle = false;
 int intakeToggle = false;
 bool curvatureToggle = false;
-
 bool autonSelectorActive = true;
+
+//Holds the current target velocity for the flywheel
+int flywheelVel = 0;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -14,8 +17,7 @@ bool autonSelectorActive = true;
  */
 
 void initialize() {
-	//Initialize PROS LCD
-	//pros::lcd::initialize();
+	//Initialize the auton selector
 	selector.init();
 }
 
@@ -49,6 +51,8 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {	
+	//Run the auton the user selected based on the output of the Selector class
+	selector.getSelection()();
 }
 
 /**
@@ -70,8 +74,8 @@ void opcontrol() {
 		if(master[ControllerDigital::L1].changedToPressed()) {
 			//Deactivate the auton selector and start the grapher
 			if(autonSelectorActive) {
-				selector.setActive(false);
-				grapher.initGraph();
+				//if(!fw.isActive())
+					//fw.init();
 				autonSelectorActive = false;
 			}
 			
@@ -80,16 +84,22 @@ void opcontrol() {
 				indexer.index();
 			}
 			else {
-				//Otherwise, turn the flywheel on
+				//Otherwise, turn the flywheel on at 400 rpm
 				fwToggle = true;
-				fw.setVelocity(600);
+				//fw.setVelocity(flywheelVel);
+				flywheelVel = 400;
 			}
 		}
+
+		//Run the flywheel at 600 rpm if up is pressed
+		if(master[ControllerDigital::up].changedToPressed())
+			flywheelVel = 600;
 
 		//Button to turn the flywheel off
 		if(master[ControllerDigital::L2].changedToPressed()) {
 			fwToggle = false;
-			fw.setVelocity(0);
+			//fw.setVelocity(0);
+			flywheelVel = 0;
 		}
 
 		//Button to toggle disc intake
@@ -126,10 +136,10 @@ void opcontrol() {
 		//Set the power of the intake based on value calculated above
 		intake.moveVelocity(100 * intakeToggle);
 
-		//Control flywheel velocity based on value set above
-		if(!autonSelectorActive)
-			fw.controlVelocity();
-		
+		//Set the power of the flywheel based on value calculated above
+		flyWheel.moveVelocity(flywheelVel);
+
+
 		pros::delay(20);
 	}
 }

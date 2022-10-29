@@ -1,9 +1,9 @@
 #pragma once
-#include "api.hpp"
+#include "xlib/grapher.hpp"
 #include "globals.hpp"
 
 namespace xlib {
-    class Flywheel {
+    class Flywheel : TaskWrapper {
         float targetVelocity = 0.0f;
         float driveApprox = 0.0f;
         bool firstCross = false;
@@ -12,23 +12,36 @@ namespace xlib {
         float prevError;
         float drive = 0.0f;
 
-        double gain = 0.0002f;
+        double gain = 0.002f;
+
+        bool active = false;
         
         FILE* targetVelocityTelem = fopen("/usd/TBH/targetVelocity.txt", "w");
         FILE* measuredVelocityTelem = fopen("/usd/TBH/measuredVelocity.txt", "w");
-        FILE* tbhTelem = fopen("/usd/TBH/tbh.txt.txt", "w");
+        FILE* tbhTelem = fopen("/usd/TBH/tbh.txt", "w");
+
+        void loop();
 
     public:
 
+        Flywheel() = default;
+        ~Flywheel() = default;
+
         void setVelocity(int velocity, float predicted_drive);
+
+        void test();
 
         void setVelocity(int velocity);
 
-        void controlVelocity();
+        void init();
+
+        bool isActive();
 
         void setGain(double newGain);
 
         double getGain();
+
+        void controlVelocity();
     };
 
     extern Flywheel fw;

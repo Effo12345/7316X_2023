@@ -10,3 +10,5 @@ using namespace xlib;
 #include "xlib/interface.hpp"
 #include "xlib/pneumatics.hpp"
 #include "xlib/selector.hpp"
+#include "xlib/extendedchassis.hpp"
+#include "xlib/roller.hpp"

@@ -1,6 +1,14 @@
-#include "flywheel.hpp"
+#include "xlib/flywheel.hpp"
+
+/*
+ * The flywheel class implements the Take Back Half (TBH) velocity control
+ * algorithm. It takes in a target velocity and operates asynchronously by
+ * inheriting from the TaskWrapper to keep the flywheel's velocity as steady
+ * as possible
+ */
 
 namespace xlib {
+    //Set class variables based on input
     void Flywheel::setVelocity(int velocity, float predicted_drive) {
         targetVelocity = velocity;
 
@@ -13,6 +21,8 @@ namespace xlib {
         driveAtZero = 0;
     }
 
+    //Set class variables based on input and calculate predicted_drive as 
+    //percentage of maximum velocity (600 rpm)
     void Flywheel::setVelocity(int velocity) {
         targetVelocity = velocity;
 
@@ -25,6 +35,8 @@ namespace xlib {
         driveAtZero = 0;
     }
 
+    //Called iteratively, this function computes the desired flywheel velocity
+    //and sets the flywheel motor group to that value
     void Flywheel::controlVelocity() {
         currentError = targetVelocity - flyWheel.getActualVelocity();
 
@@ -52,11 +64,33 @@ namespace xlib {
         pros::lcd::set_text(1, "Actual: " + std::to_string(flyWheel.getActualVelocity()));
     }
 
-    void Flywheel::setGain(double newGain) {
-        gain = newGain;
-        return;
+    //Based on the TaskWrapper, loop is called by startTask()
+    void Flywheel::loop() {
+        while(true) {
+            controlVelocity();
+            pros::delay(25);
+        }
     }
 
+    //Initialize dependencies
+    void Flywheel::init() {
+        grapher.initGraph();
+        //selector.setActive(false);
+        startTask();
+        active = true;
+    }
+
+    //Trivial accessor for boolean value: active
+    bool Flywheel::isActive() {
+        return active;
+    }
+
+    //Trivial setter for gain. Allows for easier flywheel tuning via user interface
+    void Flywheel::setGain(double newGain) {
+        gain = newGain;
+    }
+
+    //Trivial accessor for double value: gain
     double Flywheel::getGain() {
         return gain;
     }

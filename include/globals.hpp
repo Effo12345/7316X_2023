@@ -20,4 +20,10 @@ extern Motor roller;
 
 extern Pneumatics indexer;
 
+extern ADIEncoder leftEncoder;
+extern IMU gyro;
+
+extern IterativePosPIDController turnPID;
+extern IterativePosPIDController drivePID;
+extern IterativePosPIDController driveShortPID;
 extern std::shared_ptr<OdomChassisController> chassis;
