@@ -1,4 +1,5 @@
 #include "xlib/flywheel.hpp"
+#include "globals.hpp"
 
 /*
  * The flywheel class implements the Take Back Half (TBH) velocity control
@@ -29,7 +30,7 @@ namespace xlib {
         currentError = targetVelocity - flyWheel.getActualVelocity();
         prevError = currentError;
 
-        driveApprox = targetVelocity / 600;
+        driveApprox = targetVelocity;
 
         firstCross = true;
         driveAtZero = 0;
@@ -42,7 +43,7 @@ namespace xlib {
 
         drive = drive + (currentError * gain);
 
-        drive = std::clamp(drive, 0.0f, 1.0f);
+        drive = std::clamp(drive, 0.0f, 600.0f);
 
         if(sgn(currentError) != sgn(prevError)) {
             if(firstCross) {
@@ -56,28 +57,44 @@ namespace xlib {
         }
         prevError = currentError;
 
-        flyWheel.moveVoltage(drive * MAX_VOLTAGE);
+        flyWheel.moveVoltage((drive / 600) * MAX_VOLTAGE);
 
         grapher.newData(targetVelocity, 0);
         grapher.newData(flyWheel.getActualVelocity(), 1);
-        pros::lcd::set_text(0, "Target: " + std::to_string(targetVelocity));
-        pros::lcd::set_text(1, "Actual: " + std::to_string(flyWheel.getActualVelocity()));
+        pros::lcd::set_text(0, "Target: " 
+            + std::to_string(targetVelocity));
+        pros::lcd::set_text(1, "Actual: " 
+            + std::to_string(flyWheel.getActualVelocity()));
+
+        /*
+        std::string output = std::to_string(currentError) + "\n";
+        char outputArray[output.size() + 1];
+        strcpy(outputArray, output.c_str());
+    	fprintf(tbhTelem, "%s\n", outputArray);
+        */
     }
 
     //Based on the TaskWrapper, loop is called by startTask()
     void Flywheel::loop() {
         while(true) {
             controlVelocity();
-            pros::delay(25);
+            pros::delay(20);
         }
     }
 
     //Initialize dependencies
     void Flywheel::init() {
         grapher.initGraph();
-        //selector.setActive(false);
+        selector.setActive(false);
         startTask();
         active = true;
+    }
+
+    void Flywheel::stop() {
+        stopTask();
+        flyWheel.moveVoltage(0);
+
+        //fclose(tbhTelem);
     }
 
     //Trivial accessor for boolean value: active
@@ -85,7 +102,8 @@ namespace xlib {
         return active;
     }
 
-    //Trivial setter for gain. Allows for easier flywheel tuning via user interface
+    //Trivial setter for gain. Allows for easier flywheel tuning via user 
+    //interface
     void Flywheel::setGain(double newGain) {
         gain = newGain;
     }

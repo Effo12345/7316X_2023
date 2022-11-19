@@ -12,13 +12,13 @@ namespace xlib {
         float prevError;
         float drive = 0.0f;
 
-        double gain = 0.002f;
+        double gain = 0.027f;
 
         bool active = false;
         
-        FILE* targetVelocityTelem = fopen("/usd/TBH/targetVelocity.txt", "w");
-        FILE* measuredVelocityTelem = fopen("/usd/TBH/measuredVelocity.txt", "w");
-        FILE* tbhTelem = fopen("/usd/TBH/tbh.txt", "w");
+        //FILE* targetVelocityTelem = fopen("/usd/TBH/targetVelocity.txt", "w");
+        //FILE* measuredVelocityTelem = fopen("/usd/TBH/measuredVelocity.txt", "w");
+        //FILE* tbhTelem = fopen("/usd/tbh.txt", "w");
 
         void loop();
 
@@ -34,6 +34,7 @@ namespace xlib {
         void setVelocity(int velocity);
 
         void init();
+        void stop();
 
         bool isActive();
 

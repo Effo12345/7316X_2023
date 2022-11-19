@@ -1,108 +1,83 @@
 #include "autonomous.hpp"
 #include "globals.hpp"
 
-    //Turns the roller on the left side of the field and launches preload discs
-    //for half of the autonomous win point
+    //Turns the roller on the left side of the field 
     void WPL() {
         //Back into the roller
-        control.driveShortTo(-1);
+        chassis->getModel()->arcade(0.5, 0);
+        pros::delay(100);
+        chassis->getModel()->arcade(0, 0);
 
         //Flip the roller to scored
+        chassis->getModel()->arcade(0.05, 0);
 	    rollerMech.flip();
-
-        //Spin up the flywheel
-	    //fw.init();
-	    //fw.setVelocity(600);
-        flyWheel.moveVelocity(600);
-        control.driveTo(4);
-        pros::delay(100);
-
-        //Turn to face the high goal
-        control.turnTo(-8);
-        pros::delay(1000);
-
-        //Launch two discs
-        indexer.index();
-        pros::delay(2000);
-        indexer.index();
-        pros::delay(500);
-        flyWheel.moveVelocity(0);
+        chassis->getModel()->arcade(0, 0);
     }
 
     //Turns the roller on the right half of the field for half of the autonomous
     //win point
     void WPR() {
-        //Turn -90 degrees
-        control.turnTo(-90);
+        //Navigate to the roller
+        control.driveTo(24);
         pros::delay(100);
-
-        //Drive backwards
-        chassis->getModel()->arcade(-0.5, 0);
-        pros::delay(1000);
-        chassis->getModel()->arcade(0, 0);
+        control.turnTo(90);
         pros::delay(100);
-
-        //Turn to face starting orientation
-        control.turnTo(0);
-        pros::delay(100);
-        
-        //Back up into the roller
-        chassis->getModel()->arcade(-0.5, 0);
-        pros::delay(300);
-        chassis->getModel()->arcade(0, 0);
-        pros::delay(100);
+        control.driveTo(5);
 
         //Flip the roller to a scored position
-        rollerMech.flip();
+        chassis->getModel()->arcade(0.5, 0);
+	    rollerMech.flip();
+        chassis->getModel()->arcade(0, 0);
     }
 
     //Programming skills. Scores two rollers and expands at the 1o second mark
     void Skills() {
-        //Back into roller
-        control.driveShortTo(-1);
+        fw.init();
+        fw.setVelocity(435);
 
-        //Flip the roller to a scored position
-        chassis->getModel()->arcade(0.1, 0);
-        rollerMech.flip();
-        chassis->getModel()->arcade(0, 0);
-
-        //Drive forward to knock disc out of the way
+        //Back into the roller
         chassis->getModel()->arcade(0.5, 0);
-        pros::delay(1000);
+        pros::delay(100);
+        chassis->getModel()->arcade(0, 0);
+
+        //Flip the roller to scored
+        chassis->getModel()->arcade(0.05, 0);
+        rollerMech.skillsFlip();
         chassis->getModel()->arcade(0, 0);
         pros::delay(100);
 
-        //Turn to face second roller
-        control.turnTo(75);
+        //Back away from the roller
+        control.driveTo(-5);
+        pros::delay(100);
+        //Turn to face the high goal
+        control.turnTo(-11);
         pros::delay(100);
 
-        //Drive backwards to avoid disc
-        chassis->getModel()->arcade(-0.5, 0);
-        pros::delay(1000);
-        chassis->getModel()->arcade(0, 0);
+        //Wait for the flywheel to spin up, then launch a disc
+        pros::delay(7000);
+        indexer.index();
+        fw.setVelocity(352);
+        //Wait for the flywheel to stabilize and launch a disc
+        pros::delay(4000);
+        indexer.index();
         pros::delay(100);
+        fw.setVelocity(0);
 
-        //Turn to face second roller
+        //Drive to second roller
+        control.driveTo(-14);
+        pros::delay(100);
         control.turnTo(90);
         pros::delay(100);
 
-        //Drive backwards into second roller
-        chassis->getModel()->arcade(-0.5, 0);
-        pros::delay(400);
-        chassis->getModel()->arcade(0, 0);
-        pros::delay(100);	
-
-        //Flip the second roller into a scored position
-        chassis->getModel()->arcade(0.1, 0);
-        rollerMech.flip();
-        chassis->getModel()->arcade(0, 0);
-
-        //Drive forward away from roller
+        //Turn on intake to clear disc in path
+        intake.moveVelocity(200);
+        //Flip the roller to scored
         chassis->getModel()->arcade(0.5, 0);
         pros::delay(1000);
+        intake.moveVelocity(0);
+        pros::delay(500);
+        rollerMech.skillsFlip();
         chassis->getModel()->arcade(0, 0);
-        pros::delay(100);	
-
-        //Turn to an angle in preparation for expansion
-        control.turnTo(135);
+        rightEncoder.reset();
+        pros::delay(100);
     }

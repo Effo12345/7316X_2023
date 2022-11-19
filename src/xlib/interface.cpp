@@ -2,9 +2,9 @@
 
 /*
  * The Interface class contains all functions necessary for communicating with 
- * the terminal on a laptop via USB. This allows for the easy changing and tuning
- * of values without having to recompile the code each time. More features are
- * planned to be implemented using this class
+ * the terminal on a laptop via USB. This allows for the easy changing and
+ * tuning of values without having to recompile the code each time. More features
+ * are planned to be implemented using this class
  */
 
 namespace xlib {

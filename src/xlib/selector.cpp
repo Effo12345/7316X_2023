@@ -12,7 +12,8 @@ namespace xlib {
 
     //Generalized function to initialize all values of an LVGL button and return
     //the completed object
-    lv_obj_t * Selector::createBtn(lv_obj_t * parent, lv_coord_t x, lv_coord_t y, lv_coord_t width, lv_coord_t height, const char * title, bool isHidden) {
+    lv_obj_t * Selector::createBtn(lv_obj_t * parent, lv_coord_t x, lv_coord_t y, 
+    lv_coord_t width, lv_coord_t height, const char * title, bool isHidden){
         //title = std::to_string(y).c_str();
         lv_obj_t * btnTemp = lv_btn_create(parent, NULL);
         //lv_obj_align(btn, NULL, align, offsetX, offsetY);
@@ -28,8 +29,9 @@ namespace xlib {
 
     Selector selector;
 
-    //Called when a button on the auton selector is pressed. Declared outside the
-    //Selector class so they can return a static variable, as is required by LVGL
+    //Called when a button on the auton selector is pressed. Declared outside
+    //the Selector class so they can return a static variable, as is required by
+    //LVGL
     static lv_res_t AutonNumber(lv_obj_t * btnTemp) {
         selector.AutonNum(btnTemp);
         return LV_RES_OK;
@@ -60,9 +62,11 @@ namespace xlib {
             lv_btn_set_state(emptyM3, LV_BTN_STATE_INA);
             
             for(auto &b : main_page)
-                lv_btn_set_action(b, LV_BTN_ACTION_CLICK, AutonNumber);
+                lv_btn_set_action(b, LV_BTN_ACTION_CLICK, 
+                    AutonNumber);
 
-            lv_btn_set_action(backButton, LV_BTN_ACTION_CLICK, Back);
+            lv_btn_set_action(backButton, LV_BTN_ACTION_CLICK, 
+                Back);
         }
 
     //Set the auton selector to be visible based on the value of iState

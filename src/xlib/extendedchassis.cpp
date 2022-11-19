@@ -29,7 +29,7 @@ void ExtendedChassis::turnTo(double iAngle ) {
 		pros::delay(25);
 	} while((!turnPID.isSettled()));
     (chassis->getModel())->arcade(0, 0);
-    leftEncoder.reset();
+    rightEncoder.reset();
 }
 
 //Drive until length iDistance using tracking wheel PID
@@ -37,7 +37,7 @@ void ExtendedChassis::driveTo(double iDistance) {
     do {
         drivePID.setTarget(InToDeg(iDistance));
 
-		double distance = leftEncoder.get();
+		double distance = rightEncoder.get();
 		double power = drivePID.step(distance);
 		(chassis->getModel())->arcade(power, 0);
 		//pros::lcd::set_text(1, std::to_string(DegToIn(distance)));
@@ -53,7 +53,7 @@ void ExtendedChassis::driveShortTo(double iDistance) {
     do {
         driveShortPID.setTarget(InToDeg(iDistance));
 
-		double distance = leftEncoder.get();
+		double distance = rightEncoder.get();
 		double power = driveShortPID.step(distance);
 		(chassis->getModel())->arcade(power, 0);
 		//pros::lcd::set_text(1, std::to_string(DegToIn(distance)));

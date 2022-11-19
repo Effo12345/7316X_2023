@@ -1,13 +1,16 @@
 #include "main.h"
+#include "globals.hpp"
 
 //Boolean flags for use in driver control
 bool fwToggle = false;
 int intakeToggle = false;
+int rollerToggle = false;
 bool curvatureToggle = false;
 bool autonSelectorActive = true;
+bool hasExpanded = false;
 
 //Holds the current target velocity for the flywheel
-int flywheelVel = 0;
+int flywheelVel = 225;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -74,37 +77,58 @@ void opcontrol() {
 		if(master[ControllerDigital::L1].changedToPressed()) {
 			//Deactivate the auton selector and start the grapher
 			if(autonSelectorActive) {
-				//if(!fw.isActive())
-					//fw.init();
+				if(!fw.isActive())
+					fw.init();
 				autonSelectorActive = false;
 			}
 			
 			if(fwToggle) {
-				//Actuate the indexer if the flywheel is already moving
+				//If the flywheel is already moving,
+				//actuate the indexer
 				indexer.index();
 			}
 			else {
 				//Otherwise, turn the flywheel on at 400 rpm
 				fwToggle = true;
-				//fw.setVelocity(flywheelVel);
-				flywheelVel = 400;
+				fw.setVelocity(flywheelVel, 250);
 			}
 		}
-
-		//Run the flywheel at 600 rpm if up is pressed
-		if(master[ControllerDigital::up].changedToPressed())
-			flywheelVel = 600;
 
 		//Button to turn the flywheel off
 		if(master[ControllerDigital::L2].changedToPressed()) {
 			fwToggle = false;
-			//fw.setVelocity(0);
-			flywheelVel = 0;
+			fw.setVelocity(0);
 		}
 
 		//Button to toggle disc intake
 		if(master[ControllerDigital::R1].changedToPressed())
 			intakeToggle = !intakeToggle;
+
+		//Button to set the roller mech
+		if(master[ControllerDigital::R2].isPressed()) {
+			rollerToggle = true;
+		}
+		else if(master[ControllerDigital::left].isPressed()) {
+			rollerToggle *= -1;
+		}
+		else {
+			rollerToggle = false;
+		}
+
+		//Trigger expansion by pressing all 4 shoulder buttons
+		//This ensures it will never be triggered accidentally
+		if( !hasExpanded &&
+			master[ControllerDigital::L1].isPressed() &&
+			master[ControllerDigital::L2].isPressed() &&
+			master[ControllerDigital::R1].isPressed() &&
+			master[ControllerDigital::R2].isPressed() ) {
+				expansion.toggle();
+				hasExpanded = true;
+				fwToggle = false;
+				rollerToggle = false;
+				fw.setVelocity(0);	
+				intakeToggle = false;
+		} 
 
 		//Button for inverting the disc intake
 		if(master[ControllerDigital::A].changedToPressed())
@@ -113,31 +137,28 @@ void opcontrol() {
 		//Button to toggle between tank control and curvature control
 		if(master[ControllerDigital::Y].changedToPressed())
 			curvatureToggle = !curvatureToggle;
-
-		//Button to set the roller mech
-		if(master[ControllerDigital::R2].isPressed()) {
-			roller.moveVelocity(200);
-		}
-		else {
-			roller.moveVelocity(0);
-		}
 		
 
-		//Using okapilib's chassis object, set the wheel velocity based on the sticks and the selected control scheme
+		//Using okapilib's chassis object, set the wheel velocity based on 
+		//the sticks and the selected control scheme
 		if(curvatureToggle) {
-			chassis->getModel()->curvature(master.getAnalog(ControllerAnalog::leftY),
-										 master.getAnalog(ControllerAnalog::rightX));
+			chassis->getModel()->curvature (
+				master.getAnalog(ControllerAnalog::leftY),
+				master.getAnalog(ControllerAnalog::rightX)
+			);
 		}
 		else {
-			chassis->getModel()->tank(master.getAnalog(ControllerAnalog::leftY),
-									master.getAnalog(ControllerAnalog::rightY));
+			chassis->getModel()->tank (
+				master.getAnalog(ControllerAnalog::leftY),
+				master.getAnalog(ControllerAnalog::rightY)
+			);
 		}
 
 		//Set the power of the intake based on value calculated above
-		intake.moveVelocity(100 * intakeToggle);
+		intake.moveVelocity(200 * intakeToggle);
 
-		//Set the power of the flywheel based on value calculated above
-		flyWheel.moveVelocity(flywheelVel);
+		//Set the power of the roller based on value calculated above
+		roller.moveVelocity(100 * rollerToggle);
 
 
 		pros::delay(20);

@@ -24,17 +24,18 @@ namespace xlib {
         piston.set_value(iState);
     }
 
-    //Actuate the piston, delay 150 msec, retract the piston. Used in the
+    //Actuate the piston, delay 100 msec, retract the piston. Used in the
     //flywheel's indexer
     void Pneumatics::index() {
         startTask();
     }
 
     //Inherited from the TaskWrapper class, loop is called by startTask() and
-    //runs asynchronously. loop() implements the functionality attributed to index()
+    //runs asynchronously. loop() implements the functionality attributed to 
+    //index()
     void Pneumatics::loop() {
         toggle();
-        pros::delay(150);
+        pros::delay(100);
         toggle();
         stopTask();
     }

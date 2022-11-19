@@ -19,8 +19,9 @@ extern Motor intake;
 extern Motor roller;
 
 extern Pneumatics indexer;
+extern Pneumatics expansion;
 
-extern ADIEncoder leftEncoder;
+extern ADIEncoder rightEncoder;
 extern IMU gyro;
 
 extern IterativePosPIDController turnPID;

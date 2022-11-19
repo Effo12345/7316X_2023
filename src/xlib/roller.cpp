@@ -12,7 +12,23 @@ namespace xlib {
     void Roller::flip() {
         roller.moveVelocity(200);
         roller.tarePosition();
-        while(roller.getPosition() < flipDegrees)
+        while(roller.getPosition() < 30)
+            pros::delay(25);
+        roller.moveVelocity(0);
+    }
+
+    void Roller::skillsFlip() {
+        roller.moveVelocity(200);
+        roller.tarePosition();
+        while(roller.getPosition() < 120)
+            pros::delay(25);
+        roller.moveVelocity(0);
+    }
+
+    void Roller::skillsFlip2() {
+        roller.moveVelocity(200);
+        roller.tarePosition();
+        while(roller.getPosition() < 200)
             pros::delay(25);
         roller.moveVelocity(0);
     }

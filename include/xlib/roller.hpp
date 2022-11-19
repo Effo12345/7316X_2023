@@ -3,10 +3,11 @@
 
 namespace xlib {
     class Roller {
-        int flipDegrees = 200;
 
     public:
         void flip();
+        void skillsFlip();
+        void skillsFlip2();
     };
     extern Roller rollerMech;
 }
