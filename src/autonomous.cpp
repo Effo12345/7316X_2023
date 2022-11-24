@@ -18,15 +18,19 @@
     //win point
     void WPR() {
         //Navigate to the roller
-        control.driveTo(24);
+        control.driveTo(30);
         pros::delay(100);
         control.turnTo(90);
         pros::delay(100);
-        control.driveTo(5);
+        
+        chassis->getModel()->arcade(0.15, 0);
+	    pros::delay(1000);
+        chassis->getModel()->arcade(0, 0);
+        pros::delay(100);
 
         //Flip the roller to a scored position
-        chassis->getModel()->arcade(0.5, 0);
-	    rollerMech.flip();
+        chassis->getModel()->arcade(0.27, 0);
+	    rollerMech.skillsFlip2();
         chassis->getModel()->arcade(0, 0);
     }
 
@@ -75,9 +79,21 @@
         chassis->getModel()->arcade(0.5, 0);
         pros::delay(1000);
         intake.moveVelocity(0);
-        pros::delay(500);
+        //pros::delay(500);
         rollerMech.skillsFlip();
         chassis->getModel()->arcade(0, 0);
         rightEncoder.reset();
         pros::delay(100);
+
+        control.driveTo(-5);
+        pros::delay(100);
+        control.turnTo(-135);
+        pros::delay(100);
+        control.driveTo(12);
+        pros::delay(100);
+
+        expansion.toggle();
+        pros::delay(1000);
+
+        chassis->getModel()->arcade(1, 0);
     }

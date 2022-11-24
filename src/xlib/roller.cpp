@@ -18,17 +18,21 @@ namespace xlib {
     }
 
     void Roller::skillsFlip() {
+        int time = pros::millis();
         roller.moveVelocity(200);
         roller.tarePosition();
-        while(roller.getPosition() < 120)
+        while(roller.getPosition() < 90) {
+            if(pros::millis() - time > 2000)
+                break;
             pros::delay(25);
+        }
         roller.moveVelocity(0);
     }
 
     void Roller::skillsFlip2() {
         roller.moveVelocity(200);
         roller.tarePosition();
-        while(roller.getPosition() < 200)
+        while(roller.getPosition() < 50)
             pros::delay(25);
         roller.moveVelocity(0);
     }

@@ -5,26 +5,30 @@ using namespace xlib;
 Controller master(ControllerId::master);
 
 //Motors
-Motor driveFL(11, true, AbstractMotor::gearset::green, 
+Motor driveFL(11, false, AbstractMotor::gearset::green, 
     AbstractMotor::encoderUnits::degrees);
 Motor driveBL(12, true, AbstractMotor::gearset::green, 
     AbstractMotor::encoderUnits::degrees);
-Motor driveFR(13, false, AbstractMotor::gearset::green, 
+Motor driveTL(13, false, AbstractMotor::gearset::green,
     AbstractMotor::encoderUnits::degrees);
-Motor driveBR(14, false, AbstractMotor::gearset::green, 
+Motor driveFR(14, true, AbstractMotor::gearset::green, 
     AbstractMotor::encoderUnits::degrees);
-Motor intake(15, true, AbstractMotor::gearset::green, 
+Motor driveBR(15, false, AbstractMotor::gearset::green, 
     AbstractMotor::encoderUnits::degrees);
-Motor flywheel1(16, true, AbstractMotor::gearset::blue, 
+Motor driveTR(16, true, AbstractMotor::gearset::green, 
     AbstractMotor::encoderUnits::degrees);
-Motor flywheel2(20, false, AbstractMotor::gearset::blue, 
+Motor intake(17, true, AbstractMotor::gearset::green, 
     AbstractMotor::encoderUnits::degrees);
-Motor roller(18, false, AbstractMotor::gearset::red, 
+Motor flywheel1(18, true, AbstractMotor::gearset::blue, 
+    AbstractMotor::encoderUnits::degrees);
+Motor flywheel2(19, false, AbstractMotor::gearset::blue, 
+    AbstractMotor::encoderUnits::degrees);
+Motor roller(20, false, AbstractMotor::gearset::red, 
     AbstractMotor::encoderUnits::degrees);
 
 //Motor groups
-MotorGroup driveL({driveFL, driveBL});
-MotorGroup driveR({driveFR, driveBR});
+MotorGroup driveL({driveFL, driveBL, driveTL});
+MotorGroup driveR({driveFR, driveBR, driveTR});
 MotorGroup flyWheel({flywheel1, flywheel2});
 
 //Pneumatics
