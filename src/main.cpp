@@ -77,8 +77,6 @@ void opcontrol() {
 		if(master[ControllerDigital::L1].changedToPressed()) {
 			//Deactivate the auton selector and start the grapher
 			if(autonSelectorActive) {
-				if(!fw.isActive())
-					fw.init();
 				autonSelectorActive = false;
 			}
 			
@@ -88,16 +86,16 @@ void opcontrol() {
 				indexer.index();
 			}
 			else {
-				//Otherwise, turn the flywheel on at 400 rpm
+				//Otherwise, turn the flywheel on at 225 rpm
 				fwToggle = true;
-				fw.setVelocity(flywheelVel, 250);
+				fw.moveVelocity(flywheelVel, 250);
 			}
 		}
 
 		//Button to turn the flywheel off
 		if(master[ControllerDigital::L2].changedToPressed()) {
 			fwToggle = false;
-			fw.setVelocity(0);
+			fw.moveVelocity(0);
 		}
 
 		//Button to toggle disc intake
@@ -126,7 +124,7 @@ void opcontrol() {
 				hasExpanded = true;
 				fwToggle = false;
 				rollerToggle = false;
-				fw.setVelocity(0);	
+				fw.moveVelocity(0);	
 				intakeToggle = false;
 		} 
 
@@ -158,7 +156,7 @@ void opcontrol() {
 		intake.moveVelocity(200 * intakeToggle);
 
 		//Set the power of the roller based on value calculated above
-		roller.moveVelocity(100 * rollerToggle);
+		//roller.moveVelocity(100 * rollerToggle);
 
 
 		pros::delay(20);

@@ -11,7 +11,5 @@ namespace xlib {
         void clearGraph();
         void newData(double data, int series);
     };
-
-    extern Grapher grapher;
 }
 

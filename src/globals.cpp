@@ -17,19 +17,14 @@ Motor driveBR(15, false, AbstractMotor::gearset::green,
     AbstractMotor::encoderUnits::degrees);
 Motor driveTR(16, true, AbstractMotor::gearset::green, 
     AbstractMotor::encoderUnits::degrees);
-Motor intake(17, true, AbstractMotor::gearset::green, 
+Flywheel fw(17, false, AbstractMotor::gearset::blue, 
     AbstractMotor::encoderUnits::degrees);
-Motor flywheel1(18, true, AbstractMotor::gearset::blue, 
-    AbstractMotor::encoderUnits::degrees);
-Motor flywheel2(19, false, AbstractMotor::gearset::blue, 
-    AbstractMotor::encoderUnits::degrees);
-Motor roller(20, false, AbstractMotor::gearset::red, 
+Motor intake(18, true, AbstractMotor::gearset::green, 
     AbstractMotor::encoderUnits::degrees);
 
 //Motor groups
 MotorGroup driveL({driveFL, driveBL, driveTL});
 MotorGroup driveR({driveFR, driveBR, driveTR});
-MotorGroup flyWheel({flywheel1, flywheel2});
 
 //Pneumatics
 Pneumatics indexer(3, true);

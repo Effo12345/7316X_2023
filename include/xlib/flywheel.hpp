@@ -1,9 +1,12 @@
 #pragma once
-#include "xlib/grapher.hpp"
-#include "globals.hpp"
+#include "okapi/impl/device/motor/motor.hpp"
+#include "taskwrapper.hpp"
+#include "grapher.hpp"
+#include "utils.hpp"
+#include "selector.hpp"
 
 namespace xlib {
-    class Flywheel : TaskWrapper {
+    class Flywheel : TaskWrapper, okapi::Motor {
         float targetVelocity = 0.0f;
         float driveApprox = 0.0f;
         bool firstCross = false;
@@ -15,6 +18,8 @@ namespace xlib {
         double gain = 0.027f;
 
         bool active = false;
+
+        Grapher grapher;
         
         //FILE* targetVelocityTelem = fopen("/usd/TBH/targetVelocity.txt", "w");
         //FILE* measuredVelocityTelem = fopen("/usd/TBH/measuredVelocity.txt", "w");
@@ -22,21 +27,14 @@ namespace xlib {
 
         void loop();
 
-    public:
-
-        Flywheel() = default;
-        ~Flywheel() = default;
-
-        void setVelocity(int velocity, float predicted_drive);
-
-        void test();
-
-        void setVelocity(int velocity);
-
         void init();
         void stop();
 
-        bool isActive();
+    public:
+
+        using Motor::Motor;
+
+        void moveVelocity(int velocity, float predicted_drive = -1);
 
         void setGain(double newGain);
 
@@ -44,8 +42,6 @@ namespace xlib {
 
         void controlVelocity();
     };
-
-    extern Flywheel fw;
 }
 
 

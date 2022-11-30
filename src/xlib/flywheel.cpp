@@ -1,5 +1,4 @@
 #include "xlib/flywheel.hpp"
-#include "globals.hpp"
 
 /*
  * The flywheel class implements the Take Back Half (TBH) velocity control
@@ -10,27 +9,22 @@
 
 namespace xlib {
     //Set class variables based on input
-    void Flywheel::setVelocity(int velocity, float predicted_drive) {
+    void Flywheel::moveVelocity(int velocity, float predicted_drive) {
+        if(!active)
+            init();
+
         targetVelocity = velocity;
 
-        currentError = targetVelocity - flyWheel.getActualVelocity();
+        currentError = targetVelocity - getActualVelocity();
         prevError = currentError;
 
-        driveApprox = predicted_drive;
-
-        firstCross = true;
-        driveAtZero = 0;
-    }
-
-    //Set class variables based on input and calculate predicted_drive as 
-    //percentage of maximum velocity (600 rpm)
-    void Flywheel::setVelocity(int velocity) {
-        targetVelocity = velocity;
-
-        currentError = targetVelocity - flyWheel.getActualVelocity();
-        prevError = currentError;
-
-        driveApprox = targetVelocity;
+        //If the predicted drive is unset, set it driveApprox a decent estimate
+        //of the target velocity.
+        if(predicted_drive == -1)
+            driveApprox = targetVelocity;
+        //Otherwise, set the drivaApprox value correctly
+        else
+            driveApprox = predicted_drive;
 
         firstCross = true;
         driveAtZero = 0;
@@ -39,7 +33,7 @@ namespace xlib {
     //Called iteratively, this function computes the desired flywheel velocity
     //and sets the flywheel motor group to that value
     void Flywheel::controlVelocity() {
-        currentError = targetVelocity - flyWheel.getActualVelocity();
+        currentError = targetVelocity - getActualVelocity();
 
         drive = drive + (currentError * gain);
 
@@ -57,14 +51,14 @@ namespace xlib {
         }
         prevError = currentError;
 
-        flyWheel.moveVoltage((drive / 600) * MAX_VOLTAGE);
+        moveVoltage((drive / 600) * 12000);
 
         grapher.newData(targetVelocity, 0);
-        grapher.newData(flyWheel.getActualVelocity(), 1);
+        grapher.newData(getActualVelocity(), 1);
         pros::lcd::set_text(0, "Target: " 
             + std::to_string(targetVelocity));
         pros::lcd::set_text(1, "Actual: " 
-            + std::to_string(flyWheel.getActualVelocity()));
+            + std::to_string(getActualVelocity()));
 
         /*
         std::string output = std::to_string(currentError) + "\n";
@@ -92,14 +86,9 @@ namespace xlib {
 
     void Flywheel::stop() {
         stopTask();
-        flyWheel.moveVoltage(0);
+        moveVoltage(0);
 
         //fclose(tbhTelem);
-    }
-
-    //Trivial accessor for boolean value: active
-    bool Flywheel::isActive() {
-        return active;
     }
 
     //Trivial setter for gain. Allows for easier flywheel tuning via user 
@@ -112,6 +101,4 @@ namespace xlib {
     double Flywheel::getGain() {
         return gain;
     }
-
-    Flywheel fw;
 }

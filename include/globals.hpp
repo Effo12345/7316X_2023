@@ -1,6 +1,7 @@
 #pragma once
 #include "main.h"
 #include "xlib/pneumatics.hpp"
+#include "xlib/flywheel.hpp"
 
 //#include "xlib/grapher.hpp"
 //#include "xlib/interface.hpp"
@@ -13,10 +14,9 @@ extern Controller master;
 
 extern MotorGroup driveL;
 extern MotorGroup driveR;
-extern MotorGroup flyWheel;
 
+extern Flywheel fw;
 extern Motor intake;
-extern Motor roller;
 
 extern Pneumatics indexer;
 extern Pneumatics expansion;

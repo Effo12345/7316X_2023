@@ -40,6 +40,4 @@ namespace xlib {
     
         lv_chart_refresh(chart);
     }
-
-    Grapher grapher;
 }

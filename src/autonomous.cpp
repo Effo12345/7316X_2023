@@ -36,8 +36,7 @@
 
     //Programming skills. Scores two rollers and expands at the 1o second mark
     void Skills() {
-        fw.init();
-        fw.setVelocity(435);
+        fw.moveVelocity(435);
 
         //Back into the roller
         chassis->getModel()->arcade(0.5, 0);
@@ -60,12 +59,12 @@
         //Wait for the flywheel to spin up, then launch a disc
         pros::delay(7000);
         indexer.index();
-        fw.setVelocity(352);
+        fw.moveVelocity(352);
         //Wait for the flywheel to stabilize and launch a disc
         pros::delay(4000);
         indexer.index();
         pros::delay(100);
-        fw.setVelocity(0);
+        fw.moveVelocity(0);
 
         //Drive to second roller
         control.driveTo(-14);
