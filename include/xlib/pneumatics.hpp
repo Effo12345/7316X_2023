@@ -3,7 +3,7 @@
 #include "xlib/taskwrapper.hpp"
 
 namespace xlib {
-    class Pneumatics : TaskWrapper {
+    class Pneumatics {
         pros::ADIDigitalOut piston;
         bool state;
 
@@ -15,10 +15,6 @@ namespace xlib {
         void toggle();
 
         void set(bool iState);
-
-        void index();
-
-        void loop();
 
         bool getState() const;
     };

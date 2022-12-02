@@ -4,13 +4,14 @@
 //Boolean flags for use in driver control
 bool fwToggle = false;
 int intakeToggle = false;
-int rollerToggle = false;
+bool rollerToggle = false;
+bool indexerToggle = false;
 bool curvatureToggle = false;
 bool autonSelectorActive = true;
 bool hasExpanded = false;
 
 //Holds the current target velocity for the flywheel
-int flywheelVel = 225;
+int flywheelVel = 3600;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -73,24 +74,22 @@ void autonomous() {
  */
 void opcontrol() {
 	while(true) {
+		//Button to activate the indexer
+		if(master[ControllerDigital::L1].isPressed()) {
+			if(fwToggle)
+				indexerToggle = true;
+		}
+
 		//Button to turn the flywheel on and toggle the indexer
 		if(master[ControllerDigital::L1].changedToPressed()) {
-			//Deactivate the auton selector and start the grapher
-			if(autonSelectorActive) {
-				autonSelectorActive = false;
-			}
-			
-			if(fwToggle) {
-				//If the flywheel is already moving,
-				//actuate the indexer
-				indexer.index();
-			}
-			else {
+			if(!fwToggle) {
 				//Otherwise, turn the flywheel on at 225 rpm
-				fwToggle = true;
-				fw.moveVelocity(flywheelVel, 250);
+				//fwToggle = true;
+				fw.moveVelocity(flywheelVel);
 			}
 		}
+		else if(master[ControllerDigital::L1].changedToReleased())
+			fwToggle = true;
 
 		//Button to turn the flywheel off
 		if(master[ControllerDigital::L2].changedToPressed()) {
@@ -105,9 +104,7 @@ void opcontrol() {
 		//Button to set the roller mech
 		if(master[ControllerDigital::R2].isPressed()) {
 			rollerToggle = true;
-		}
-		else if(master[ControllerDigital::left].isPressed()) {
-			rollerToggle *= -1;
+			intakeToggle = false;
 		}
 		else {
 			rollerToggle = false;
@@ -152,13 +149,18 @@ void opcontrol() {
 			);
 		}
 
-		//Set the power of the intake based on value calculated above
-		intake.moveVelocity(200 * intakeToggle);
+		//Set the power of the everythingElse motor based on values calculated above
+		if(indexerToggle)
+			everythingElse.moveVoltage(-12000);
+		else if(intakeToggle || intakeToggle == -1)
+			everythingElse.moveVoltage(12000 * intakeToggle);
+		else if(rollerToggle)
+			everythingElse.moveVoltage(-12000);
+		else
+		 everythingElse.moveVoltage(0);
 
-		//Set the power of the roller based on value calculated above
-		//roller.moveVelocity(100 * rollerToggle);
-
-
+		indexerToggle = false;
+		
 		pros::delay(20);
 	}
 }

@@ -5,21 +5,21 @@ using namespace xlib;
 Controller master(ControllerId::master);
 
 //Motors
-Motor driveFL(11, false, AbstractMotor::gearset::green, 
+Motor driveFL(11, false, AbstractMotor::gearset::blue, 
     AbstractMotor::encoderUnits::degrees);
-Motor driveBL(12, true, AbstractMotor::gearset::green, 
+Motor driveBL(12, true, AbstractMotor::gearset::blue, 
     AbstractMotor::encoderUnits::degrees);
-Motor driveTL(13, false, AbstractMotor::gearset::green,
+Motor driveTL(13, false, AbstractMotor::gearset::blue,
     AbstractMotor::encoderUnits::degrees);
-Motor driveFR(14, true, AbstractMotor::gearset::green, 
+Motor driveFR(1, true, AbstractMotor::gearset::blue, 
     AbstractMotor::encoderUnits::degrees);
-Motor driveBR(15, false, AbstractMotor::gearset::green, 
+Motor driveBR(2, false, AbstractMotor::gearset::blue, 
     AbstractMotor::encoderUnits::degrees);
-Motor driveTR(16, true, AbstractMotor::gearset::green, 
+Motor driveTR(3, true, AbstractMotor::gearset::blue, 
     AbstractMotor::encoderUnits::degrees);
-Flywheel fw(17, false, AbstractMotor::gearset::blue, 
+Flywheel fw(4, false, AbstractMotor::gearset::blue, 
     AbstractMotor::encoderUnits::degrees);
-Motor intake(18, true, AbstractMotor::gearset::green, 
+Motor everythingElse(14, true, AbstractMotor::gearset::red, 
     AbstractMotor::encoderUnits::degrees);
 
 //Motor groups
@@ -27,7 +27,6 @@ MotorGroup driveL({driveFL, driveBL, driveTL});
 MotorGroup driveR({driveFR, driveBR, driveTR});
 
 //Pneumatics
-Pneumatics indexer(3, true);
 Pneumatics expansion(6, false);
 
 //Sensors

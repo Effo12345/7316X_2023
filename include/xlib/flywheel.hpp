@@ -15,8 +15,6 @@ namespace xlib {
         float prevError;
         float drive = 0.0f;
 
-        double gain = 0.027f;
-
         bool active = false;
 
         Grapher grapher;
@@ -35,12 +33,6 @@ namespace xlib {
         using Motor::Motor;
 
         void moveVelocity(int velocity, float predicted_drive = -1);
-
-        void setGain(double newGain);
-
-        double getGain();
-
-        void controlVelocity();
     };
 }
 

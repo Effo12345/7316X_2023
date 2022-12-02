@@ -16,7 +16,7 @@ extern MotorGroup driveL;
 extern MotorGroup driveR;
 
 extern Flywheel fw;
-extern Motor intake;
+extern Motor everythingElse;
 
 extern Pneumatics indexer;
 extern Pneumatics expansion;

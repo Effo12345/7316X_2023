@@ -15,7 +15,7 @@ namespace xlib {
 
         targetVelocity = velocity;
 
-        currentError = targetVelocity - getActualVelocity();
+        currentError = targetVelocity - (getActualVelocity() * 6);
         prevError = currentError;
 
         //If the predicted drive is unset, set it driveApprox a decent estimate
@@ -30,48 +30,40 @@ namespace xlib {
         driveAtZero = 0;
     }
 
-    //Called iteratively, this function computes the desired flywheel velocity
-    //and sets the flywheel motor group to that value
-    void Flywheel::controlVelocity() {
-        currentError = targetVelocity - getActualVelocity();
-
-        drive = drive + (currentError * gain);
-
-        drive = std::clamp(drive, 0.0f, 600.0f);
-
-        if(sgn(currentError) != sgn(prevError)) {
-            if(firstCross) {
-                drive = driveApprox;
-                firstCross = false;
-            }
-            else
-                drive = 0.5 * (drive + driveAtZero);
-
-            driveAtZero = drive;
-        }
-        prevError = currentError;
-
-        moveVoltage((drive / 600) * 12000);
-
-        grapher.newData(targetVelocity, 0);
-        grapher.newData(getActualVelocity(), 1);
-        pros::lcd::set_text(0, "Target: " 
-            + std::to_string(targetVelocity));
-        pros::lcd::set_text(1, "Actual: " 
-            + std::to_string(getActualVelocity()));
-
-        /*
-        std::string output = std::to_string(currentError) + "\n";
-        char outputArray[output.size() + 1];
-        strcpy(outputArray, output.c_str());
-    	fprintf(tbhTelem, "%s\n", outputArray);
-        */
-    }
-
     //Based on the TaskWrapper, loop is called by startTask()
+    //Running asynchronously, this function computes the desired flywheel velocity
+    //and sets the motor base class to the correct voltage
     void Flywheel::loop() {
+        double gain = 0.0002f;
+
         while(true) {
-            controlVelocity();
+            currentError = targetVelocity - (getActualVelocity() * 6);
+
+            drive = drive + (currentError * gain);
+
+            drive = std::clamp(drive, 0.0f, 1.0f);
+
+            if(sgn(currentError) != sgn(prevError)) {
+                if(firstCross) {
+                    drive = driveApprox;
+                    firstCross = false;
+                }
+                else
+                    drive = 0.5 * (drive + driveAtZero);
+
+                driveAtZero = drive;
+            }
+            prevError = currentError;
+
+            moveVoltage(drive * 12000);
+
+            grapher.newData(targetVelocity, 0);
+            grapher.newData(getActualVelocity(), 1);
+            pros::lcd::set_text(0, "Target: " 
+                + std::to_string(targetVelocity));
+            pros::lcd::set_text(1, "Actual: " 
+                + std::to_string(getActualVelocity()));
+
             pros::delay(20);
         }
     }
@@ -89,16 +81,5 @@ namespace xlib {
         moveVoltage(0);
 
         //fclose(tbhTelem);
-    }
-
-    //Trivial setter for gain. Allows for easier flywheel tuning via user 
-    //interface
-    void Flywheel::setGain(double newGain) {
-        gain = newGain;
-    }
-
-    //Trivial accessor for double value: gain
-    double Flywheel::getGain() {
-        return gain;
     }
 }

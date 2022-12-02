@@ -73,11 +73,9 @@
         pros::delay(100);
 
         //Turn on intake to clear disc in path
-        intake.moveVelocity(200);
         //Flip the roller to scored
         chassis->getModel()->arcade(0.5, 0);
         pros::delay(1000);
-        intake.moveVelocity(0);
         //pros::delay(500);
         rollerMech.skillsFlip();
         chassis->getModel()->arcade(0, 0);
