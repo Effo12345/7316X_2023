@@ -34,7 +34,7 @@ namespace xlib {
     //Running asynchronously, this function computes the desired flywheel velocity
     //and sets the motor base class to the correct voltage
     void Flywheel::loop() {
-        double gain = 0.0002f;
+        double gain = 0.00015f;
 
         while(true) {
             currentError = targetVelocity - (getActualVelocity() * 6);
@@ -58,7 +58,7 @@ namespace xlib {
             moveVoltage(drive * 12000);
 
             grapher.newData(targetVelocity, 0);
-            grapher.newData(getActualVelocity(), 1);
+            grapher.newData((getActualVelocity() * 6), 1);
             pros::lcd::set_text(0, "Target: " 
                 + std::to_string(targetVelocity));
             pros::lcd::set_text(1, "Actual: " 

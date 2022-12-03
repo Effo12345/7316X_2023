@@ -11,7 +11,7 @@ bool autonSelectorActive = true;
 bool hasExpanded = false;
 
 //Holds the current target velocity for the flywheel
-int flywheelVel = 3600;
+int flywheelVel = 1950;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -83,9 +83,9 @@ void opcontrol() {
 		//Button to turn the flywheel on and toggle the indexer
 		if(master[ControllerDigital::L1].changedToPressed()) {
 			if(!fwToggle) {
-				//Otherwise, turn the flywheel on at 225 rpm
+				//Otherwise, turn the flywheel on at  rpm
 				//fwToggle = true;
-				fw.moveVelocity(flywheelVel);
+				fw.moveVelocity(flywheelVel, 9600);
 			}
 		}
 		else if(master[ControllerDigital::L1].changedToReleased())

@@ -58,11 +58,11 @@
 
         //Wait for the flywheel to spin up, then launch a disc
         pros::delay(7000);
-        indexer.index();
+        //indexer.index();
         fw.moveVelocity(352);
         //Wait for the flywheel to stabilize and launch a disc
         pros::delay(4000);
-        indexer.index();
+        //indexer.index();
         pros::delay(100);
         fw.moveVelocity(0);
 
