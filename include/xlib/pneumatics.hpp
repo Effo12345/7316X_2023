@@ -1,8 +1,9 @@
 #pragma once
 #include "pros/adi.hpp"
+#include "xlib/taskwrapper.hpp"
 
 namespace xlib {
-    class Pneumatics {
+    class Pneumatics : TaskWrapper {
         pros::ADIDigitalOut piston;
         bool state;
 
@@ -14,6 +15,10 @@ namespace xlib {
         void toggle();
 
         void set(bool iState);
+
+        void quickAction();
+
+        void loop();
 
         bool getState() const;
     };

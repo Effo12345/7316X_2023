@@ -18,10 +18,21 @@ namespace xlib {
         piston.set_value(state);
     }
 
+    void Pneumatics::quickAction() {
+        startTask();
+    }
+
     //Set state of the piston to iState
     void Pneumatics::set(bool iState){
         state = iState;
         piston.set_value(iState);
+    }
+
+    void Pneumatics::loop() {
+        toggle();
+        pros::delay(200);
+        toggle();
+        stopTask();
     }
 
     //Trivial (const) getter for boolean: state

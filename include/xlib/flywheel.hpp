@@ -21,7 +21,7 @@ namespace xlib {
         
         //FILE* targetVelocityTelem = fopen("/usd/TBH/targetVelocity.txt", "w");
         //FILE* measuredVelocityTelem = fopen("/usd/TBH/measuredVelocity.txt", "w");
-        //FILE* tbhTelem = fopen("/usd/tbh.txt", "w");
+        //FILE* deltaVelocity= fopen("/usd/deltaVel.txt", "w");
 
         void loop();
 

@@ -10,19 +10,19 @@
 namespace xlib {
     //Run the everythingElse for long enough to flip it into a scored position
     void Roller::flip() {
-        everythingElse.moveVelocity(200);
+        everythingElse.moveVelocity(-100);
         everythingElse.tarePosition();
-        while(everythingElse.getPosition() < 30)
+        while(everythingElse.getPosition() > -150)
             pros::delay(25);
         everythingElse.moveVelocity(0);
     }
 
     void Roller::skillsFlip() {
         int time = pros::millis();
-        everythingElse.moveVelocity(200);
+        everythingElse.moveVelocity(-100);
         everythingElse.tarePosition();
-        while(everythingElse.getPosition() < 90) {
-            if(pros::millis() - time > 2000)
+        while(everythingElse.getPosition() > -300) {
+            if(pros::millis() - time > 4000)
                 break;
             pros::delay(25);
         }

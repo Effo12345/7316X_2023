@@ -1,5 +1,6 @@
 #pragma once
 #include "pros/rtos.hpp"
+#include "okapi/api.hpp"
 
 template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
@@ -22,3 +23,9 @@ class rateLimiter {
 public:
   float constrain(float input, float maxRateChange);
 };
+
+okapi::QAngle rescale180(okapi::QAngle angle);
+double rescale180(double angle);
+
+double tickToIn(double tick, okapi::ChassisScales scale, okapi::AbstractMotor::GearsetRatioPair gearset);
+double inToTick(double in, okapi::ChassisScales scale, okapi::AbstractMotor::GearsetRatioPair gearset);

@@ -1,4 +1,5 @@
 #include "xlib/flywheel.hpp"
+#include "globals.hpp"
 
 /*
  * The flywheel class implements the Take Back Half (TBH) velocity control
@@ -34,8 +35,8 @@ namespace xlib {
     //Running asynchronously, this function computes the desired flywheel velocity
     //and sets the motor base class to the correct voltage
     void Flywheel::loop() {
-        double gain = 0.00015f;
-
+        double gain = 0.00025f;
+        
         while(true) {
             currentError = targetVelocity - (getActualVelocity() * 6);
 

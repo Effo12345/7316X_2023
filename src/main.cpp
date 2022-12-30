@@ -1,5 +1,6 @@
 #include "main.h"
 #include "globals.hpp"
+#include "pros/llemu.hpp"
 
 //Boolean flags for use in driver control
 bool fwToggle = false;
@@ -11,7 +12,7 @@ bool autonSelectorActive = true;
 bool hasExpanded = false;
 
 //Holds the current target velocity for the flywheel
-int flywheelVel = 1950;
+int flywheelVel = 2100;
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -85,7 +86,7 @@ void opcontrol() {
 			if(!fwToggle) {
 				//Otherwise, turn the flywheel on at  rpm
 				//fwToggle = true;
-				fw.moveVelocity(flywheelVel, 9600);
+				fw.moveVelocity(flywheelVel, 0.6);
 			}
 		}
 		else if(master[ControllerDigital::L1].changedToReleased())
@@ -123,6 +124,7 @@ void opcontrol() {
 				rollerToggle = false;
 				fw.moveVelocity(0);	
 				intakeToggle = false;
+				master.rumble("-");
 		} 
 
 		//Button for inverting the disc intake
@@ -132,7 +134,6 @@ void opcontrol() {
 		//Button to toggle between tank control and curvature control
 		if(master[ControllerDigital::Y].changedToPressed())
 			curvatureToggle = !curvatureToggle;
-		
 
 		//Using okapilib's chassis object, set the wheel velocity based on 
 		//the sticks and the selected control scheme
@@ -155,7 +156,7 @@ void opcontrol() {
 		else if(intakeToggle || intakeToggle == -1)
 			everythingElse.moveVoltage(12000 * intakeToggle);
 		else if(rollerToggle)
-			everythingElse.moveVoltage(-12000);
+			everythingElse.moveVoltage(12000);
 		else
 		 everythingElse.moveVoltage(0);
 

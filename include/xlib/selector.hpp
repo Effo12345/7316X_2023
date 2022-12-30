@@ -12,7 +12,7 @@ namespace xlib {
 
         //Declares function pointers to hold the call to auton functions
         void (*grabL) (){&None}, (*grabR) (){&None}, (*winPointL) (){&WPL},
-                        (*winPointR) (){&WPR}, (*fullL) (){&None},
+                        (*winPointR) (){&WPR}, (*fullL) (){&FullL},
                         (*fullR) (){&None}, (*rTall) (){&None}, (*dGrab) (){&None},
                         (*wP) (){&None}, (*skills_t) (){&Skills}, (*none) (){&None};
         

@@ -7,11 +7,9 @@ namespace xlib {
 		const double wheelConversionFactor = 360 / trackingCircumference;
 
     public:
-        void turnTo(double iAngle);
+		void turnTo(QAngle targetAngle, QTime time);
 
-        void driveTo(double iDistance);
-    
-		void driveShortTo(double iDistance);
+        void driveTo(QLength target, QTime time);
 
 		double DegToIn(double deg);
 		double InToDeg(double in);
