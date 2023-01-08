@@ -7,7 +7,7 @@ Controller master(ControllerId::master);
 //Experimental implementation of two-wheel odometry. Default chassis used by the
 //rest of the code to control the drivetrain
 std::shared_ptr<OdomChassisController> chassis = ChassisControllerBuilder()
-    .withMotors({11, -12, 13}, {-1, 2, -3})
+    .withMotors({12, -13, 14}, {-8, 9, -10})
     .withMaxVelocity(600)
     //.withSensors(leftEncoder, rightEncoder)
     .withGains(
@@ -23,9 +23,8 @@ std::shared_ptr<OdomChassisController> chassis = ChassisControllerBuilder()
     .buildOdometry();
 
 //Motors
-Flywheel fw(4, false, AbstractMotor::gearset::blue, 
-    AbstractMotor::encoderUnits::degrees);
-Motor everythingElse(14, true, AbstractMotor::gearset::red, 
+Flywheel fw(1, 0.00025f);
+Motor everythingElse(15, true, AbstractMotor::gearset::red, 
     AbstractMotor::encoderUnits::degrees);
 
 //Pneumatics
@@ -36,7 +35,7 @@ ADIEncoder leftEncoder('A', 'B', false);
 ADIEncoder middleEncoder('D', 'E', false);
 ADIEncoder rightEncoder('G', 'H', true);
 
-IMU gyro(10);
+IMU gyro(20);
 
 //OkapiLib PID controller objects. They have been tuned using their (kP, kI, kD) 
 //values

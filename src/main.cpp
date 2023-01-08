@@ -1,6 +1,4 @@
 #include "main.h"
-#include "globals.hpp"
-#include "pros/llemu.hpp"
 
 //Boolean flags for use in driver control
 bool fwToggle = false;
