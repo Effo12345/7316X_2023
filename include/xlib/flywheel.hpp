@@ -15,6 +15,8 @@ namespace xlib {
         float prevError;
         float drive = 0.0f;
 
+        double gain = 0.0f;
+
         bool active = false;
 
         Grapher grapher;
@@ -30,7 +32,7 @@ namespace xlib {
 
     public:
 
-        using Motor::Motor;
+        Flywheel(std::int8_t iport, float igain = 0.00025f);
 
         void moveVelocity(int velocity, float predicted_drive = -1);
     };

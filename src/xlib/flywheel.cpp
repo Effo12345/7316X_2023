@@ -1,5 +1,4 @@
 #include "xlib/flywheel.hpp"
-#include "globals.hpp"
 
 /*
  * The flywheel class implements the Take Back Half (TBH) velocity control
@@ -16,7 +15,7 @@ namespace xlib {
 
         targetVelocity = velocity;
 
-        currentError = targetVelocity - (getActualVelocity() * 6);
+        currentError = targetVelocity - (getActualVelocity() * 18);
         prevError = currentError;
 
         //If the predicted drive is unset, set it driveApprox a decent estimate
@@ -34,11 +33,9 @@ namespace xlib {
     //Based on the TaskWrapper, loop is called by startTask()
     //Running asynchronously, this function computes the desired flywheel velocity
     //and sets the motor base class to the correct voltage
-    void Flywheel::loop() {
-        double gain = 0.00025f;
-        
+    void Flywheel::loop() {       
         while(true) {
-            currentError = targetVelocity - (getActualVelocity() * 6);
+            currentError = targetVelocity - (getActualVelocity() * 18);
 
             drive = drive + (currentError * gain);
 
@@ -59,7 +56,7 @@ namespace xlib {
             moveVoltage(drive * 12000);
 
             grapher.newData(targetVelocity, 0);
-            grapher.newData((getActualVelocity() * 6), 1);
+            grapher.newData((getActualVelocity() * 18), 1);
             pros::lcd::set_text(0, "Target: " 
                 + std::to_string(targetVelocity));
             pros::lcd::set_text(1, "Actual: " 
@@ -83,4 +80,8 @@ namespace xlib {
 
         //fclose(tbhTelem);
     }
+
+    Flywheel::Flywheel(std::int8_t iport, float igain)
+        : okapi::Motor{iport}, //Calls the constructor for okapi::Motor 
+          gain{igain} {}
 }
