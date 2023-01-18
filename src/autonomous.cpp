@@ -78,34 +78,61 @@
         control.driveTo(10_in, 1000_ms);
         pros::delay(1000);
 
-        fw.moveVelocity(2475, 0.6);
-        pros::delay(250);
         control.turnTo(0_deg, 500_ms);
-        pros::delay(2000);
-        everythingElse.moveVoltage(-12000);
-        pros::delay(1000);
-        fw.moveVelocity(0);
-        everythingElse.moveVoltage(0);
         pros::delay(100);
 
         control.driveTo(18_in, 1_s);
         pros::delay(100);
         control.turnTo(90_deg, 1000_ms);
         pros::delay(100);
+        everythingElse.moveVoltage(0);
 
-        control.driveTo(-23_in, 1000_ms);
+        control.driveTo(-22_in, 1000_ms);
         //(chassis->getModel())->arcade(-0.05, 0.0);
         rollerMech.skillsFlip();
         //(chassis->getModel())->stop();
         pros::delay(100);
 
 
-        control.driveTo(12_in, 1500_ms);
+        control.driveTo(-10_in, 1000_ms);
+        fw.toggleReverse();
+        everythingElse.moveVoltage(12000);
         pros::delay(100);
-        control.turnTo(45_deg, 500_ms);
+        control.turnTo(0_deg, 1000_ms);
+        fw.toggleReverse();
         pros::delay(100);
-        control.driveTo(-15_in, 500_ms);
+        fw.moveVelocity(2130, 0.4);
+        control.driveTo(45_in, 1000_ms);
         pros::delay(100);
+
+        control.turnTo(5_deg, 500_ms);
+        pros::delay(1000);
+        everythingElse.moveVoltage(-12000);
+        pros::delay(1000);
+        everythingElse.moveVoltage(0);
+        pros::delay(250);
+        fw.moveVelocity(0);
+
+        /*
+        control.turnTo(65_deg, 1_s);
+        pros::delay(100);
+
+        everythingElse.moveVoltage(12000);
+        (chassis->getModel())->arcade(0.4, 0.0);
+        pros::delay(3000);
+        (chassis->getModel())->stop();
+        everythingElse.moveVoltage(0);
+        */
+
+        
+        control.turnTo(-8_deg, 500_ms);
+        pros::delay(100);
+        control.driveTo(-63_in, 2_s);
+        pros::delay(100);
+        control.turnTo(45_deg, 1_s);
+        pros::delay(100);
+        control.driveTo(4_in, 500_ms);
+        pros::delay(1000);
 
         expansion.toggle();
     }

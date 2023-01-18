@@ -1,4 +1,5 @@
 #include "globals.hpp"
+#include "autonomous.hpp"
 using namespace xlib;
 
 //Controller
@@ -23,7 +24,7 @@ std::shared_ptr<OdomChassisController> chassis = ChassisControllerBuilder()
     .buildOdometry();
 
 //Motors
-Flywheel fw(1, 0.00025f);
+Flywheel fw(1, 0.000255f, selector);
 Motor everythingElse(15, true, AbstractMotor::gearset::red, 
     AbstractMotor::encoderUnits::degrees);
 
@@ -42,3 +43,9 @@ IMU gyro(20);
 std::shared_ptr<IterativePosPIDController> turnPID = std::make_shared<IterativePosPIDController>(0.05, 0.005, 0.00165, 0, TimeUtilFactory::withSettledUtilParams(2, 2, 200_ms));
 std::shared_ptr<IterativePosPIDController> movePID = std::make_shared<IterativePosPIDController>(0.07, 0.0, 0.002, 0, TimeUtilFactory::withSettledUtilParams(2, 2, 100_ms));
 std::shared_ptr<IterativePosPIDController> headingPID = std::make_shared<IterativePosPIDController>(0.04, 0.0, 0.0, 0, TimeUtilFactory::createDefault());
+
+Selector selector({
+    {{"Left roller", WPL}, {"Left full", FullL}},
+    {{"Skills", Skills}},
+    {{"Right roller", WPR}}
+});

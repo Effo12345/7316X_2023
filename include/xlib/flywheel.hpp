@@ -18,9 +18,11 @@ namespace xlib {
         double gain = 0.0f;
 
         bool active = false;
+        bool doBackSpin = false;
 
         Grapher grapher;
-        
+        Selector& selector;
+
         //FILE* targetVelocityTelem = fopen("/usd/TBH/targetVelocity.txt", "w");
         //FILE* measuredVelocityTelem = fopen("/usd/TBH/measuredVelocity.txt", "w");
         //FILE* deltaVelocity= fopen("/usd/deltaVel.txt", "w");
@@ -28,13 +30,14 @@ namespace xlib {
         void loop();
 
         void init();
-        void stop();
 
     public:
 
-        Flywheel(std::int8_t iport, float igain = 0.00025f);
+        Flywheel(std::int8_t iport, float igain, Selector& sel);
 
         void moveVelocity(int velocity, float predicted_drive = -1);
+        void toggleReverse();
+        void stop();
     };
 }
 

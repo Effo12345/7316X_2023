@@ -35,6 +35,13 @@ namespace xlib {
     //and sets the motor base class to the correct voltage
     void Flywheel::loop() {       
         while(true) {
+            //If the flywheel should spin backwards, set it to negative voltage
+            //and continue
+            if(doBackSpin) {
+                moveVoltage(-12000);
+                continue;
+            }
+
             currentError = targetVelocity - (getActualVelocity() * 18);
 
             drive = drive + (currentError * gain);
@@ -75,13 +82,15 @@ namespace xlib {
     }
 
     void Flywheel::stop() {
-        stopTask();
         moveVoltage(0);
-
         //fclose(tbhTelem);
     }
 
-    Flywheel::Flywheel(std::int8_t iport, float igain)
+    void Flywheel::toggleReverse() {
+        doBackSpin = !doBackSpin;
+    }
+
+    Flywheel::Flywheel(std::int8_t iport, float igain, Selector& sel)
         : okapi::Motor{iport}, //Calls the constructor for okapi::Motor 
-          gain{igain} {}
+          gain{igain}, selector{sel} {}
 }
