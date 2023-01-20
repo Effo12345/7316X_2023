@@ -1,49 +1,37 @@
 #include "globals.hpp"
 #include "autonomous.hpp"
+#include "xlib/chassis/extendedchassisbuilder.hpp"
 using namespace xlib;
 
 //Controller
 Controller master(ControllerId::master);
 
-//Experimental implementation of two-wheel odometry. Default chassis used by the
-//rest of the code to control the drivetrain
-std::shared_ptr<OdomChassisController> chassis = ChassisControllerBuilder()
+//Custom chassis object to wrap drivetrain motors and control movement
+std::shared_ptr<ExtendedChassis> chassis = ExtendedChassisBuilder()
     .withMotors({12, -13, 14}, {-8, 9, -10})
-    .withMaxVelocity(600)
-    //.withSensors(leftEncoder, rightEncoder)
+    .withDimensions({AbstractMotor::gearset::blue, (5.0 / 3.0)}, {{4.0_in, 11.875_in}, quadEncoderTPR}, 17_in)
+    .withSensors({'A', 'B'}, {'C', 'D'}, 0, 0, 20)
     .withGains(
-        {0.003, 0.001, 0.000022}, // Distance controller gains
-        {0.08, 0.0025, 0.002}, // Turn controller gains
-        {0.0, 0, 0.0}  // Angle controller gains
+        {0.05, 0.005, 0.00165}, // Distance controller gains
+        {0.07, 0.0, 0.002}, // Turn controller gains
+        {0.04, 0.0, 0.0},  // Angle controller gains
+        {2.4, 0.0, 2.0} //Pure pursuit gains
     )
-    //green gearset, tracking wheel diameter (2.75 in), track (7 in), 
-    //and TPR (360)
-    .withDimensions({AbstractMotor::gearset::blue, (5.0 / 3.0)}, {
-        {4.0_in, 11.875_in}, quadEncoderTPR})
-    .withOdometry()
-    .buildOdometry();
+    .withVelocityConstants(360, 100, 2.5, 200)
+    .withLookahead(20_in)
+    .build();
 
-//Motors
-Flywheel fw(1, 0.000255f, selector);
+//Custom flywheel object to implement TBH control
+Flywheel fw(1, 0.00025f, selector);
+
+//Motor that runs intake, indexer, and roller mechanism
 Motor everythingElse(15, true, AbstractMotor::gearset::red, 
     AbstractMotor::encoderUnits::degrees);
 
 //Pneumatics
 Pneumatics expansion(6, false);
 
-//Sensors
-ADIEncoder leftEncoder('A', 'B', false);
-ADIEncoder middleEncoder('D', 'E', false);
-ADIEncoder rightEncoder('G', 'H', true);
-
-IMU gyro(20);
-
-//OkapiLib PID controller objects. They have been tuned using their (kP, kI, kD) 
-//values
-std::shared_ptr<IterativePosPIDController> turnPID = std::make_shared<IterativePosPIDController>(0.05, 0.005, 0.00165, 0, TimeUtilFactory::withSettledUtilParams(2, 2, 200_ms));
-std::shared_ptr<IterativePosPIDController> movePID = std::make_shared<IterativePosPIDController>(0.07, 0.0, 0.002, 0, TimeUtilFactory::withSettledUtilParams(2, 2, 100_ms));
-std::shared_ptr<IterativePosPIDController> headingPID = std::make_shared<IterativePosPIDController>(0.04, 0.0, 0.0, 0, TimeUtilFactory::createDefault());
-
+//Custom auton selector object. Takes button names and functions to run
 Selector selector({
     {{"Left roller", WPL}, {"Left full", FullL}},
     {{"Skills", Skills}},

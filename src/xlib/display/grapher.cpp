@@ -1,4 +1,4 @@
-#include "grapher.hpp"
+#include "xlib/display/grapher.hpp"
 
 /*
  * The Grapher class uses LVGL to display data graphs (up to 2 datasets 

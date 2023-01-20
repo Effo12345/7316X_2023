@@ -1,9 +1,9 @@
 #pragma once
 #include "main.h"
-#include "okapi/api/control/iterative/iterativePosPidController.hpp"
 #include "xlib/pneumatics.hpp"
 #include "xlib/flywheel.hpp"
-#include "xlib/selector.hpp"
+#include "xlib/display/selector.hpp"
+#include "xlib/chassis/extendedchassisbuilder.hpp"
 #include "autonomous.hpp"
 
 //Constants
@@ -24,6 +24,6 @@ extern IMU gyro;
 extern std::shared_ptr<IterativePosPIDController> turnPID;
 extern std::shared_ptr<IterativePosPIDController> movePID;
 extern std::shared_ptr<IterativePosPIDController> headingPID;
-extern std::shared_ptr<OdomChassisController> chassis;
+extern std::shared_ptr<xlib::ExtendedChassis> chassis;
 
 extern Selector selector;

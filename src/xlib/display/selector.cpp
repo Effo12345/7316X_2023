@@ -1,4 +1,4 @@
-#include "selector.hpp"
+#include "xlib/display/selector.hpp"
 
 namespace xlib {
 
@@ -8,6 +8,13 @@ namespace xlib {
     //In the header file
     Selector* ptrSelector;
 
+    /**
+     * A trampoline function to call member functions of ptrSelector when a
+     * selector button is pressed
+     *
+     * @param btn The selector button that was pressed
+     * @return A success flag
+     */
     static lv_res_t selectionTrampoline(lv_obj_t* btn) {
         //Just in case, throw an easy to understand error if the pointer is 
         //left unitialized
@@ -19,6 +26,13 @@ namespace xlib {
         return LV_RES_OK;
     }
 
+    /**
+     * A trampoline function fo call a member function of ptrSelector when the
+     * back button is pressed
+     *
+     * @param btn Pointer to the back button
+     * @return A success flag
+     */
     static lv_res_t backTrampoline(lv_obj_t* btn) {
         if(ptrSelector == nullptr)
             throw std::runtime_error("Selector pointer unitialized");
@@ -29,8 +43,16 @@ namespace xlib {
     }
 
 
+    //Dummy function to call when no auton is selected
     void Selector::None() {};
 
+    /**
+     * Auton selector using LVGL's buttons. Computes buttons' locations. Fills
+     * mainPage and buttonMap. Initalizes autonToRun. Throws a runtime error
+     * if the selector dimensions are out of bounds
+     *
+     * @param input The names/functions to be processed
+     */
     Selector::Selector(inputData input) {
         //Check if any of the rows or columns are out of bounds
         if(input.size() > 3)
@@ -70,6 +92,13 @@ namespace xlib {
         lv_obj_set_hidden(autonName, true);
     }
 
+    /**
+     * A callback function run by the selector buttons when they are pressed.
+     * Sets autonToRun based on the buttonMap. Enables backButton and autonName
+     * while disabling the selector buttons
+     *
+     * @param btn Pointer to the button pressed
+     */
     void Selector::setSelection(lv_obj_t* btn) {
         autonToRun = buttonMap[btn];
 
@@ -84,6 +113,10 @@ namespace xlib {
         lv_obj_set_hidden(autonName, false);
     }
 
+    /**
+     * A callback function run by the back button when it is pressed.
+     * Enables the selector buttons while disabling backButton and autonName
+     */
     void Selector::back() {
         autonToRun = std::bind(&Selector::None, this);
 
@@ -97,14 +130,25 @@ namespace xlib {
         lv_obj_set_hidden(autonName, true);
     }
 
+    /**
+     * Get the final selection
+     */
     std::function<void()> Selector::getSelection() {
         return autonToRun;
     }
 
+    /**
+     * Run the selected auton, or None if none were selected
+     */
     void Selector::runSelection() {
         autonToRun();
     }
 
+    /**
+     * Sets whether the auton selector is visible/interactable
+     *
+     * @param istate The desired state to set
+     */
     void Selector::setActive(bool istate) {
         for(auto& button : mainPage) {
             button.setHidden(!istate);

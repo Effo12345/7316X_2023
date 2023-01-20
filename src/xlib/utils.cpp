@@ -24,6 +24,11 @@ float rateLimiter::constrain(float input, float maxRateChange) {
     return output;
 }
 
+void rateLimiter::reset() {
+    output = 0.0;
+    clock.reset();
+}
+
 double rescale180(double angle) {
     return angle - 360.0 * std::floor((angle + 180.0) * (1.0 / 360.0));
 }

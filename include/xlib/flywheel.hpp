@@ -1,9 +1,9 @@
 #pragma once
 #include "okapi/impl/device/motor/motor.hpp"
 #include "taskwrapper.hpp"
-#include "grapher.hpp"
+#include "xlib/display/grapher.hpp"
 #include "utils.hpp"
-#include "selector.hpp"
+#include "xlib/display/selector.hpp"
 
 namespace xlib {
     class Flywheel : TaskWrapper, okapi::Motor {

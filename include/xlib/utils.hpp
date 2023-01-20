@@ -22,6 +22,7 @@ class rateLimiter {
   float output = 0.0;      //Output value (must persist between function calls)
 public:
   float constrain(float input, float maxRateChange);
+  void reset();
 };
 
 okapi::QAngle rescale180(okapi::QAngle angle);
