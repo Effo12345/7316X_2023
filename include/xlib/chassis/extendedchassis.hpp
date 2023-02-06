@@ -34,6 +34,10 @@ namespace xlib {
 
 		void followNewPath(QPath path);
 
+		void setOdomPos(QPoint ipos, QAngle iheading);
+
+		void turnToPoint(QPoint ipoint, QTime time, bool ireversed = false);
+
 		void turnToAngle(QAngle targetAngle, QTime time);
 		void driveDistance(QLength target, QTime time);
 	};

@@ -1,4 +1,5 @@
 #include "main.h"
+#include "globals.hpp"
 #include "xlib/roller.hpp"
 
 //Boolean flags for use in driver control
@@ -9,10 +10,12 @@ bool indexerToggle = false;
 bool curvatureToggle = false;
 bool autonSelectorActive = true;
 bool hasExpanded = false;
+bool adjusterState = false;
 
-//Holds the current target velocity for the flywheel
-int flywheelVel = 2128;
-int cornerFlywheelVel = 2130;
+//Holds the current target velocities for the flywheel
+std::pair<int, float> flywheelVel {2425, 0.866};
+std::pair<int, float> angledFlywheelVel = {2500,0.886};
+std::pair<int, float> cornerFlywheelVel = {2130, 0.405};
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -21,7 +24,10 @@ int cornerFlywheelVel = 2130;
  * to keep execution time for this mode under a few seconds.
  */
 
-void initialize() {}
+void initialize() {
+	//pros::lcd::initialize();
+	//selector.setActive(false);
+}
 
 /**
  * Runs while the robot is in the disabled state of Field Management System or
@@ -83,7 +89,12 @@ void opcontrol() {
 			if(!fwToggle) {
 				//Otherwise, turn the flywheel on at  rpm
 				//fwToggle = true;
-				fw.moveVelocity(flywheelVel, 0.405);
+				fw.moveVelocity(flywheelVel.first, flywheelVel.second);
+			}
+			else if(!fwToggle && adjusterState) {
+				//Set the flywheel to a higher velocity when the angle adjuster
+				//is in the high position
+				fw.moveVelocity(angledFlywheelVel.first, angledFlywheelVel.second);
 			}
 		}
 		else if(master[ControllerDigital::L1].changedToReleased())
@@ -94,7 +105,7 @@ void opcontrol() {
 			if(!fwToggle) {
 				//Otherwise, turn the flywheel on at  rpm
 				//fwToggle = true;
-				fw.moveVelocity(cornerFlywheelVel, 0.405);
+				fw.moveVelocity(cornerFlywheelVel.first, cornerFlywheelVel.second);
 			}
 		}
 		else if(master[ControllerDigital::right].changedToReleased())
@@ -145,6 +156,25 @@ void opcontrol() {
 				intakeToggle = false;
 				master.rumble("-");
 		} 
+
+		
+		if(master[ControllerDigital::up].changedToPressed()) {
+			adjusterState = !adjusterState;
+			angleAdjuster.set(adjusterState);
+
+			if(fwToggle && adjusterState) {
+				fw.moveVelocity(angledFlywheelVel.first, angledFlywheelVel.second);
+			}
+			else if(fwToggle && !adjusterState) {
+				fw.moveVelocity(flywheelVel.first, flywheelVel.second);
+			}
+		}
+
+		/*
+		if(master[ControllerDigital::left].changedToPressed())
+			autonomous();
+		*/
+		
 
 		//Button for inverting the disc intake
 		if(master[ControllerDigital::A].changedToPressed())

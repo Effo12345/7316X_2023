@@ -62,8 +62,8 @@ namespace xlib {
 
             moveVoltage(drive * 12000);
 
-            grapher.newData(targetVelocity, 0);
-            grapher.newData((getActualVelocity() * 18), 1);
+            //grapher.newData(targetVelocity, 0);
+            //grapher.newData((getActualVelocity() * 18), 1);
             pros::lcd::set_text(0, "Target: " 
                 + std::to_string(targetVelocity));
             pros::lcd::set_text(1, "Actual: " 
@@ -75,7 +75,7 @@ namespace xlib {
 
     //Initialize dependencies
     void Flywheel::init() {
-        grapher.initGraph();
+        //grapher.initGraph();
         selector.setActive(false);
         startTask();
         active = true;

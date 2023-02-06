@@ -68,7 +68,7 @@ namespace xlib {
 		 * Returns the dot product of this point and the parameter p
 		 */
 		float dotProduct(QPoint p) {
-			return pow(x * p.x, 2) + pow(y * p.y, 2);
+			return (x * p.x) + (y * p.y);
 		}
 	};
 

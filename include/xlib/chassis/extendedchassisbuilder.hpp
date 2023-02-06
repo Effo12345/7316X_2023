@@ -23,6 +23,7 @@ namespace xlib {
         std::vector<float> purePursuitGains;
 
         float maxVelocity;
+        float absoluteMaxVelocity;
         float maxAcceleration;
         float k;
         float maxRateChange;
@@ -37,6 +38,8 @@ namespace xlib {
         ExtendedChassisBuilder& withMotors(const MotorGroup& ileft, const MotorGroup& iright);
 
         ExtendedChassisBuilder& withDimensions(const AbstractMotor::GearsetRatioPair& igearset, const ChassisScales& iscales, QLength itrackWidth);
+
+        ExtendedChassisBuilder& withMaxVelocity(const float absolMaxVel);
 
         ExtendedChassisBuilder& withSensors(const ADIEncoder& iright, const ADIEncoder& imiddle, 
                                            const RotationSensor ileftVelocity, const RotationSensor irightVelocity, 

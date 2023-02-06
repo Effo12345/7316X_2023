@@ -23,6 +23,10 @@ public:
 		    return {leftVel + v.leftVel, rightVel + v.rightVel};
 	    } 
 
+        Velocity operator-(const Velocity& v) {
+            return {leftVel - v.leftVel, rightVel - v.rightVel};
+        }
+
         Velocity operator*(const float f) {
 		return {leftVel * f, rightVel * f};
         }
@@ -35,7 +39,7 @@ public:
 private:
     pros::Mutex posThreadSafety;
 
-    QPos pos;
+    QPos pos {{0, 0}, 0};
     Velocity vel;
 
     ADIEncoder rightEncoder {'Z', 'Z'};
@@ -61,6 +65,7 @@ private:
 
 public:
     QPos getPos();
+    void setPos(QPoint ipos, QAngle iheading);
 
     Velocity getVel();
 

@@ -26,6 +26,7 @@ namespace xlib {
             float tolerance = 0.001;
             float maxVelocity;
             float maxAcceleration;
+            float absoluteVelocityLimit;
             float k;
 
             //Path following
@@ -44,9 +45,9 @@ namespace xlib {
 
             //Initialize tunings constants using an initializer list
             Settings(
-                float maxVel, float maxAccel, float curveConstant, 
+                float maxVel, float absolVelLim, float maxAccel, float curveConstant, 
                 float lookahead, float maxChange, float track, std::vector<float>& purePursuitGains
-            ) : maxVelocity{maxVel}, maxAcceleration{maxAccel}, k{curveConstant},
+            ) : maxVelocity{maxVel}, absoluteVelocityLimit{absolVelLim}, maxAcceleration{maxAccel}, k{curveConstant},
                 lookaheadDistance{lookahead}, maxRateChange{maxChange}, trackWidth{track},
                 kV{purePursuitGains[0]}, kA{purePursuitGains[1]}, kP{purePursuitGains[2]} {}
 

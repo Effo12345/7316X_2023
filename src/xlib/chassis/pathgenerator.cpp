@@ -62,6 +62,8 @@ namespace xlib {
 				change += std::abs(aux.y - curvedPath.points[i].y);
 			}
 		}
+
+		path = curvedPath;
 	}
 
 	/**
@@ -74,7 +76,10 @@ namespace xlib {
 	 * @param path Points to be processed
 	 */
     void PathGenerator::calculateCurvature(QPath& path) {
-		for(int i = 1; i < path.points.size() - 1; i++) {
+		//Reserve the memory for the vector in advance for increased performance
+		path.curvature.reserve(path.points.size());
+
+		 for(int i = 1; i < path.points.size() - 1; i++) {
 			path.points[i].x += 0.001;
 
 			float k1 = 0.5 * (pow(path.points[i].x, 2) + pow(path.points[i].y, 2) - pow(path.points[i - 1].x, 2) - pow(path.points[i - 1].y, 2)) / (path.points[i].x - path.points[i - 1].x);
@@ -103,10 +108,19 @@ namespace xlib {
 	 * @param maxAcceleration Limits the robot's maximum acceleration (rpm/s/s)
 	 */
     void PathGenerator::targetVelocity(QPath& path, const float maxVelocity, const float k, const float maxAcceleration) {
-		for(int i = (path.points.size() - 2); i > 0; i--) {
+		//Reserve the memory for the vector in advance for increased performance
+		path.velocity.reserve(path.points.size());
+		path.velocity[path.points.size()-1] = 0.0f;
+
+		for(int i = (path.points.size() - 2); i >= 0; i--) {
+			float velocityLimit = std::min(maxVelocity, (k / path.curvature[i]));
+
 			float distance = path.points[i].distanceTo(path.points[i+1]);
-			path.velocity[i] = std::min(std::min(maxVelocity, (k / path.curvature[i])), static_cast<float>(sqrt((pow(path.curvature[i+1], 2)) + (2 * maxAcceleration * distance))));
+			float accelerationLimit = sqrt(pow(path.velocity[i+1], 2) + (2 * maxAcceleration * distance));
+
+			path.velocity[i] = std::min(velocityLimit, accelerationLimit);
 		}
+
 	}
 
 	/**
@@ -121,7 +135,7 @@ namespace xlib {
 		injectPoints(path, settings.pointSpacing);
 		optimizePath(path, settings.weight_smooth, settings.tolerance);
 		calculateCurvature(path);
-		targetVelocity(path, settings.k, settings.maxVelocity, settings.maxAcceleration);
+		targetVelocity(path, settings.maxVelocity, settings.k, settings.maxAcceleration);
 	}
 
 }

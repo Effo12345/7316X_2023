@@ -40,6 +40,12 @@ namespace xlib {
      */
     void Odom::loop() {
         while(true) {
+            //Wait for the inertial sensor to finish calibrating. Continue until
+            //it does
+            if(std::isnan(imu.get()))  
+                continue;
+
+
             //Get encoder values
             double rPos = rightEncoder.get();
             double sPos = middleEncoder.get();
@@ -53,7 +59,7 @@ namespace xlib {
             prevMiddleEncoderPos = sPos;
 
             //Calculate current absolute heading in radians
-            double heading = degToRad(imu.get());
+            double heading = degToRad(360 - imu.get());
 
             //Calculate change in angle
             double deltaTheta = heading - prevHeading;
@@ -63,6 +69,7 @@ namespace xlib {
             //If the robot hasn't turned, then it only translated
             //Prevents a divide by zero error
             if(deltaTheta == 0) {
+                localDelta.x = deltaDistS;
                 localDelta.y = deltaDistR;
             }
             //Otherwise, calculate the new position
@@ -78,27 +85,30 @@ namespace xlib {
 
             QPoint globalDelta {0, 0};
             //Rotate the local delta into global coordinates
-            globalDelta.x = (localDelta.x * cos(avgTheta)) - (localDelta.y * sin(avgTheta));
-            globalDelta.y = (localDelta.x * sin(avgTheta)) + (localDelta.y * cos(avgTheta));
+            globalDelta.x = (localDelta.y * cos(avgTheta)) - (localDelta.x * sin(avgTheta));
+            globalDelta.y = (localDelta.y * sin(avgTheta)) + (localDelta.x * cos(avgTheta));
 
             //Update global position values
             //Take a mutex to ensure the pos values aren't being written to 
-            //another thread is attempting to read them
+            //while another thread is attempting to read them
             posThreadSafety.take();
-            pos.p.x += globalDelta.x;
-            pos.p.y += globalDelta.y;
-            pos.a = deltaTheta;
+            pos.p += globalDelta;
+            pos.a += deltaTheta;
             posThreadSafety.give();
+
+            pros::lcd::set_text(0, std::to_string(pos.p.y * -1));
+            pros::lcd::set_text(1, std::to_string(pos.p.x));
+            pros::lcd::set_text(2, std::to_string(radToDeg(pos.a) * -1));
 
             pros::delay(10);
         }
     }
 
     /**
-     * Accesses the class-scoped variable pos, converts its heading value to
-     * degrees and uses a mutex for thread safety.
+     * Accesses the class-scoped variable pos, using a mutex for thread 
+     * safety
      *
-     * @return Global position struct
+     * @return Global position struct (inch, inch, radian)
      */
     Odom::QPos Odom::getPos() {
         //Returned by value rather than by reference for thread safety
@@ -106,8 +116,29 @@ namespace xlib {
         QPos tmp = pos;
         posThreadSafety.give();
 
-        pos.a = radToDeg(pos.a);
+        //Take the opposite of y and heading values because odometry internally
+        //uses left turn is positive, while pure pursuit and PID turns use
+        //left turn is negative.
+        tmp.p.y *= -1;
+        tmp.a *= -1;
+
+        float storage = tmp.p.x;
+        tmp.p.x = tmp.p.y;
+        tmp.p.y = storage;
+
         return tmp;
+    }
+
+    /**
+     * Set the current absolute position and rotation for the start of an
+     * autonomous procedure
+     *
+     * @param ipos Robot's current (x, y) position
+     * @param iheading Robot's current heading (converted to radians)
+     */
+    void Odom::setPos(QPoint ipos, QAngle iheading) {
+        pos.p = ipos;
+        pos.a = iheading.convert(radian);
     }
 
     /**
@@ -160,7 +191,7 @@ namespace xlib {
      * Starts the internal thread (calls loop asynchronously)
      */
     void Odom::startLoop() {
-        startTask();
+        //startTask();
     }
 
 }

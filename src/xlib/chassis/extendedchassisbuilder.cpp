@@ -33,6 +33,18 @@ namespace xlib {
     }
 
     /**
+     * Sets the maximum velocity the robot can follow a path with
+     *
+     * @param absolMaxVel The max velocity the chassis is capable of (rpm)
+     * @return An ongion builder
+     */
+    ExtendedChassisBuilder& ExtendedChassisBuilder::withMaxVelocity(const float absolMaxVel) {
+        absoluteMaxVelocity = absolMaxVel;
+
+        return *this;
+    }
+
+    /**
      * Sets all sensors used in odometry and pure pursuit
      *
      * @param iright The right (parallel) encoder
@@ -113,7 +125,7 @@ namespace xlib {
      */
     std::shared_ptr<ExtendedChassis> ExtendedChassisBuilder::build() {
 
-        QPath::Settings settings {maxVelocity, maxAcceleration, k, 
+        QPath::Settings settings {maxVelocity, absoluteMaxVelocity, maxAcceleration, k, 
             lookahead, maxRateChange, trackWidth, purePursuitGains};
 
         return std::make_shared<ExtendedChassis>(*left, *right,

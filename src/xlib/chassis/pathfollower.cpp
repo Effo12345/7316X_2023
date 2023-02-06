@@ -1,4 +1,6 @@
 #include "xlib/chassis/pathfollower.hpp"
+#include <cmath>
+#include <stdexcept>
 
 namespace xlib {
 
@@ -95,17 +97,23 @@ namespace xlib {
      * @return Curvature to the lookahead point
      */
     float PathFollower::findArcCurvature(QPoint pos, float heading, QPoint lookahead, float lookaheadDistance) {
-        QPoint headingVector = {cos(heading), sin(heading)};
+        QPoint headingVector = {sin(heading), cos(heading)};
         QPoint lookaheadVector = lookahead - pos;
         float lookaheadVectorMagnitude = lookaheadVector.getMagnitude();
         
         //Find the target heading after the proposed arc movement
-        float targetHeading = acos((headingVector.x + lookaheadVector.x + headingVector.y * lookaheadVector.y) / lookaheadVectorMagnitude);
+        float targetHeading = acos(headingVector.dotProduct(lookaheadVector) / lookaheadVectorMagnitude);
 
         //Find whether turn is to the left or right (negative or positive)
+        //TODO: multiply by -1
         int side = sgn(((-1 * headingVector.y) * lookaheadVector.x) + (headingVector.x * lookaheadVector.y)) * -1;
 
-        float x = cos(targetHeading) * lookaheadVectorMagnitude;
+        //TODO: Change this to sin
+        float x = sin(targetHeading) * lookaheadVectorMagnitude;
+
+        if(std::isnan(side * (2 * x) / pow(lookaheadDistance, 2)))
+            throw std::runtime_error("Bad curvature");
+
         return side * (2 * x) / pow(lookaheadDistance, 2);
     }
 
@@ -152,7 +160,8 @@ namespace xlib {
             pos.a += okapi::pi;
 
         //Find closest point on the path
-        int closestPoint = lastClosestPointIndex = findClosestPointIndex(path->points, pos.p, lastClosestPointIndex);
+        int closestPoint = findClosestPointIndex(path->points, pos.p, lastClosestPointIndex);
+        lastClosestPointIndex = closestPoint;
 
         QPoint lookaheadPoint;
         //Find the lookahead point, catching a potential error of no new lookahead being found
@@ -168,25 +177,43 @@ namespace xlib {
         float curvature = findArcCurvature(pos.p, pos.a, lookaheadPoint, settings->lookaheadDistance);
 
         float targetVelocity;
+        targetVelocity = path->velocity[closestPoint];
         //Calculate the target wheel speeds
+        /*
         if(settings->useRateLimiter)
             targetVelocity = limit.constrain(path->velocity[closestPoint], settings->maxRateChange);
         else
             targetVelocity = path->velocity[closestPoint];
+        */
 
         Odom::Velocity targetVelocities = calculateWheelVelocities(targetVelocity, curvature, settings->trackWidth, settings->reversed);
 
         //Control wheel velocities using velocity PID (loop must run every 25 msec)
         Odom::Velocity feedForward {(settings->kV * targetVelocities.leftVel) + (settings->kA * ((targetVelocities.leftVel - lastVelocities.leftVel) / 0.025)),
                                     (settings->kV * targetVelocities.rightVel) + (settings->kA * ((targetVelocities.rightVel - lastVelocities.rightVel) / 0.025))};
+
+        Odom::Velocity feedF = (targetVelocities * settings->kV) + (((targetVelocities - lastVelocities) / 0.025) * settings->kA);
         lastVelocities = targetVelocities;
 
         Odom::Velocity feedBack {settings->kP * (targetVelocities.leftVel - measuredVel.leftVel),
                                 settings->kP * (targetVelocities.rightVel - measuredVel.rightVel)};
 
-        //Dividing by 200 normalizes the output to a range of [-1, 1] to give to okapi chassis
-        //TODO: This might not be the case. Test dividing by maxVelocity to normalize
-        return ((feedForward + feedBack) * settings->gearRatio) / 200;
+        Odom::Velocity feedB = (targetVelocities - measuredVel) * settings->kP;
+
+        std::string output = "Closest point: " + std::to_string(closestPoint) + "Top point: " + std::to_string(path->points.size());
+        pros::lcd::set_text(3, output);
+        std::string lookhaeadOutput = "Lookahead: (" + std::to_string(lookaheadPoint.x) + ", " + std::to_string(lookaheadPoint.y) + ")";
+        pros::lcd::set_text(4, lookhaeadOutput);
+        std::string curvatureOutput = "Curvature: " + std::to_string(curvature);
+        pros::lcd::set_text(5, curvatureOutput);
+        std::string targetVelocityOutput = "Target: " + std::to_string(targetVelocity);
+        pros::lcd::set_text(6, targetVelocityOutput);
+        std::string velocityOutput = "Velocity: (" + std::to_string(targetVelocities.leftVel) + ", " + std::to_string(targetVelocities.rightVel) + ")";
+        pros::lcd::set_text(7, velocityOutput);
+
+        //Divide by the absolute max velocity the drivetrain is capable of to 
+        //normalize the value between [-1, 1].
+        return (targetVelocities) / settings->absoluteVelocityLimit;
     }
 
     /**

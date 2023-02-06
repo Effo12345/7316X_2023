@@ -12,7 +12,7 @@ namespace xlib {
     void Roller::flip() {
         everythingElse.moveVelocity(-100);
         everythingElse.tarePosition();
-        while(everythingElse.getPosition() > -85)
+        while(everythingElse.getPosition() > -100)
             pros::delay(25);
         everythingElse.moveVelocity(0);
     }
@@ -21,7 +21,7 @@ namespace xlib {
         int time = pros::millis();
         everythingElse.moveVelocity(-100);
         everythingElse.tarePosition();
-        while(everythingElse.getPosition() > -150) {
+        while(everythingElse.getPosition() > -170) {
             if(pros::millis() - time > 4000)
                 break;
             pros::delay(25);

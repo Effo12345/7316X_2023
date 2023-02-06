@@ -1,4 +1,6 @@
 #include "xlib/chassis/extendedchassis.hpp"
+#include "odometry.hpp"
+#include "okapi/api/units/QAngle.hpp"
 
 namespace xlib {
     /**
@@ -54,17 +56,55 @@ namespace xlib {
     void ExtendedChassis::followNewPath(QPath path) {
 		pathGenerator.processWaypoints(path, settings);
 		pathFollower.setNewPath(&path, &settings, odometer.getPos());
-
+        
         //Take a mutex to ensure only one function can control the drivetrain
         //motors at a time
         motorThreadSafety.take();
-		while(!pathFollower.isSettled()) {
+		while(true/*!pathFollower.isSettled()*/) {
 			Odom::Velocity vel = pathFollower.step(odometer.getPos(), odometer.getVel());
 			(drive->getModel())->tank(vel.leftVel, vel.rightVel);
 			pros::delay(25);
 		}
         motorThreadSafety.give();
 	}
+
+
+    /**
+     * Turns to face a point on the field based on the robot's current position
+     * using the dot product angle formula.
+     *
+     * @param ipoint Point to turn towards
+     * @param time Force-quit time limit
+     * @param ireversed If the front or back of the robot should face the point
+     */
+    void ExtendedChassis::turnToPoint(QPoint ipoint, QTime time, bool ireversed) {
+        //Find the target delta heading
+        Odom::QPos pos = odometer.getPos();
+        QPoint headingVector {cos(pos.a), sin(pos.a)};
+
+        QPoint targetVector = ipoint - pos.p;
+
+        //Find angle between vectors using cross product formula
+        float targetHeading = acos(headingVector.dotProduct(targetVector) / (headingVector.getMagnitude() * targetVector.getMagnitude()));
+
+        int side = sgn((headingVector.x * ipoint.y) - (headingVector.y * ipoint.x)) * -1;
+        targetHeading = (pos.a) + (targetHeading * side);
+
+        if(ireversed)
+            targetHeading += okapi::pi;
+        
+        turnToAngle(targetHeading * radian, time);
+    }
+
+    /**
+     * Set the initial odometry position for the start of auton
+     * 
+     * @param ipos Starting position (x, y)
+     * @param iheading Starting heading (degrees)
+     */
+    void ExtendedChassis::setOdomPos(QPoint ipos, QAngle iheading) {
+        odometer.setPos(ipos, iheading);
+    }
 
     /**
      * Turn to face angle targetAngle using inertial sensor PID
