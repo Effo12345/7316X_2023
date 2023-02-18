@@ -1,6 +1,11 @@
 #include "xlib/chassis/extendedchassis.hpp"
 #include "odometry.hpp"
+#include "okapi/api/control/iterative/iterativePosPidController.hpp"
 #include "okapi/api/units/QAngle.hpp"
+#include "okapi/api/units/QLength.hpp"
+#include "okapi/impl/device/distanceSensor.hpp"
+#include <cstdint>
+#include <float.h>
 
 namespace xlib {
     /**
@@ -24,20 +29,29 @@ namespace xlib {
     ExtendedChassis::ExtendedChassis (
         const MotorGroup& ileft, const MotorGroup& iright, 
         const AbstractMotor::GearsetRatioPair& igearset, const ChassisScales& iscales,
-        const ADIEncoder& right, const ADIEncoder& middle, const RotationSensor leftVelocity, const RotationSensor rightVelocity, const IMU& inertial, 
-        const IterativePosPIDController::Gains& idistanceGains, const IterativePosPIDController::Gains& iturnGains, const IterativePosPIDController::Gains& iangleGains,
+        const ADIEncoder& right, const ADIEncoder& middle, const RotationSensor leftVelocity, const RotationSensor rightVelocity, const IMU& inertial1, const IMU& inertial2, const std::int8_t distance, 
+        const IterativePosPIDController::Gains& idistanceGains, const IterativePosPIDController::Gains& iturnGains, const IterativePosPIDController::Gains& iangleGains, const IterativePosPIDController::Gains& idistanceSensorGains,
         const QPath::Settings set
     ) {
         drive = ChassisControllerBuilder().withMotors(ileft, iright).withDimensions(igearset, iscales).build();
         odometer.setScales(iscales);
-        odometer.withSensors(right, middle, inertial, leftVelocity, rightVelocity);
-        //Start the odometer's internal thread once its values have been initialized
-        odometer.startLoop();
+        odometer.withSensors(right, middle, inertial1, inertial2, leftVelocity, rightVelocity);
+        
+        distanceSensor = std::make_shared<DistanceSensor>(distance, std::make_unique<MedianFilter<5>>());
         settings = set;
 
         turnPID = std::make_shared<IterativePosPIDController>(iturnGains, TimeUtilFactory::withSettledUtilParams(2, 2, 200_ms));
         movePID = std::make_shared<IterativePosPIDController>(idistanceGains, TimeUtilFactory::withSettledUtilParams(2, 2, 100_ms));
         headingPID = std::make_shared<IterativePosPIDController>(iangleGains, TimeUtilFactory::createDefault());
+        distancePID = std::make_shared<IterativePosPIDController>(idistanceSensorGains, TimeUtilFactory::withSettledUtilParams(0.25, 0.25, 200_ms));
+    }
+
+    void ExtendedChassis::startOdom() {
+        odometer.startLoop();
+    }
+
+    void ExtendedChassis::stopOdom() {
+        odometer.stopLoop();
     }
 
     /**
@@ -54,18 +68,22 @@ namespace xlib {
      * @param path Input waypoints to be processed and followed
      */
     void ExtendedChassis::followNewPath(QPath path) {
+        int timesRun = 0;
 		pathGenerator.processWaypoints(path, settings);
 		pathFollower.setNewPath(&path, &settings, odometer.getPos());
         
         //Take a mutex to ensure only one function can control the drivetrain
         //motors at a time
         motorThreadSafety.take();
-		while(true/*!pathFollower.isSettled()*/) {
+		while(!pathFollower.isSettled()) {
 			Odom::Velocity vel = pathFollower.step(odometer.getPos(), odometer.getVel());
 			(drive->getModel())->tank(vel.leftVel, vel.rightVel);
+
+            timesRun++;
 			pros::delay(25);
 		}
         motorThreadSafety.give();
+        std::cout << timesRun;
 	}
 
 
@@ -79,21 +97,31 @@ namespace xlib {
      */
     void ExtendedChassis::turnToPoint(QPoint ipoint, QTime time, bool ireversed) {
         //Find the target delta heading
-        Odom::QPos pos = odometer.getPos();
+        Odom::QPos pos = odometer.getRawPos();
         QPoint headingVector {cos(pos.a), sin(pos.a)};
+        QPoint adjustedPoint {ipoint.y * -1, ipoint.x};
 
-        QPoint targetVector = ipoint - pos.p;
+        QPoint targetVector = adjustedPoint - pos.p;
 
         //Find angle between vectors using cross product formula
         float targetHeading = acos(headingVector.dotProduct(targetVector) / (headingVector.getMagnitude() * targetVector.getMagnitude()));
 
-        int side = sgn((headingVector.x * ipoint.y) - (headingVector.y * ipoint.x)) * -1;
+        std::string angleOutput = "Angle size: " + std::to_string((targetHeading * radian).convert(degree));
+        pros::lcd::set_text(5, angleOutput);
+
+        int side = sgn(((-1 * headingVector.y) * targetVector.x) + (headingVector.x * targetVector.y));
         targetHeading = (pos.a) + (targetHeading * side);
 
-        if(ireversed)
+        if(!ireversed)
             targetHeading += okapi::pi;
+
+        std::string targetOutput = "Target heading: " + std::to_string((targetHeading * radian).convert(degree));
+        pros::lcd::set_text(6, targetOutput);
+
+        std::string headingOutput = "Side: " + std::to_string(side);
+        pros::lcd::set_text(7, headingOutput);
         
-        turnToAngle(targetHeading * radian, time);
+        turnToAngle(-1 * targetHeading * radian, time);
     }
 
     /**
@@ -124,7 +152,7 @@ namespace xlib {
         motorThreadSafety.take();
 
         do {
-            (drive->getModel())->arcade(0, turnPID->step(-rescale180(targetAngle.convert(degree)- odometer.getInternalIMU())));
+            (drive->getModel())->arcade(0, turnPID->step(-rescale180(targetAngle.convert(degree)- (odometer.getPos().a * radian).convert(degree))));
             //pros::lcd::set_text(1, std::to_string(odometer.getPos().a));
             //std::cout << odometer.getPos().a;
             pros::delay(10);
@@ -158,6 +186,29 @@ namespace xlib {
             (drive->getModel())->arcade(movePID->step(-error), headingPID->step(odometer.getInternalIMU()));
             pros::delay(10);
         }while(!movePID->isSettled() && timer->getDtFromMark() < time);
+
+        (drive->getModel())->stop();
+        motorThreadSafety.give();
+    }
+
+    void ExtendedChassis::driveToDistanceFrom(QLength target, QTime time) {
+        movePID->reset();
+        headingPID->reset();
+
+        movePID->setTarget(0);
+        headingPID->setTarget(odometer.getInternalIMU());
+
+        auto timer = TimeUtilFactory().createDefault().getTimer();
+        timer->placeMark();
+        motorThreadSafety.take();
+
+        do {
+            double distanceTo = (distanceSensor->get() * millimeter).convert(inch);
+            pros::lcd::set_text(1, std::to_string(distanceTo));
+            double error = target.convert(inch) - distanceTo;
+            pros::delay(10);
+            (drive->getModel())->arcade(distancePID->step(error), 0);
+        } while(!distancePID->isSettled() && timer->getDtFromMark() < time);
 
         (drive->getModel())->stop();
         motorThreadSafety.give();

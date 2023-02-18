@@ -36,6 +36,7 @@ namespace xlib {
         Flywheel(std::int8_t iport, float igain, Selector& sel);
 
         void moveVelocity(int velocity, float predicted_drive = -1);
+        void moveVelocity(std::pair<int, float> vel);
         void toggleReverse();
         void stop();
     };

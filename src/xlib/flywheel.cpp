@@ -30,6 +30,11 @@ namespace xlib {
         driveAtZero = 0;
     }
 
+    //Overload of moveVelocity function to take an std::pair
+    void Flywheel::moveVelocity(std::pair<int, float> vel) {
+        moveVelocity(vel.first, vel.second);
+    }
+
     //Based on the TaskWrapper, loop is called by startTask()
     //Running asynchronously, this function computes the desired flywheel velocity
     //and sets the motor base class to the correct voltage
@@ -62,8 +67,8 @@ namespace xlib {
 
             moveVoltage(drive * 12000);
 
-            //grapher.newData(targetVelocity, 0);
-            //grapher.newData((getActualVelocity() * 18), 1);
+            grapher.newData(targetVelocity, 0);
+            grapher.newData((getActualVelocity() * 18), 1);
             pros::lcd::set_text(0, "Target: " 
                 + std::to_string(targetVelocity));
             pros::lcd::set_text(1, "Actual: " 
@@ -75,7 +80,7 @@ namespace xlib {
 
     //Initialize dependencies
     void Flywheel::init() {
-        //grapher.initGraph();
+        grapher.initGraph({0, 3600}, 250);
         selector.setActive(false);
         startTask();
         active = true;
@@ -87,6 +92,9 @@ namespace xlib {
     }
 
     void Flywheel::toggleReverse() {
+        if(!active)
+            init();
+
         doBackSpin = !doBackSpin;
     }
 

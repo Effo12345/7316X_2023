@@ -31,6 +31,15 @@ namespace xlib {
         return dps / 0.166667;
     }   
 
+    double Odom::average(std::vector<double> n) {
+        double runningSum;
+
+        for(double val : n)
+            runningSum += val;
+
+        return runningSum / n.size();
+    }
+
     /**
      * Calculate the change in the robot's absolute position (cartesian, (x,y)
      * coordinates) using the sensor data from two tracking wheels and an 
@@ -42,7 +51,7 @@ namespace xlib {
         while(true) {
             //Wait for the inertial sensor to finish calibrating. Continue until
             //it does
-            if(std::isnan(imu.get()))  
+            if(std::isnan(imu1.get()) || std::isnan(imu2.get()))  
                 continue;
 
 
@@ -59,7 +68,7 @@ namespace xlib {
             prevMiddleEncoderPos = sPos;
 
             //Calculate current absolute heading in radians
-            double heading = degToRad(360 - imu.get());
+            double heading = degToRad(360 - imu1.get());
 
             //Calculate change in angle
             double deltaTheta = heading - prevHeading;
@@ -98,7 +107,7 @@ namespace xlib {
 
             pros::lcd::set_text(0, std::to_string(pos.p.y * -1));
             pros::lcd::set_text(1, std::to_string(pos.p.x));
-            pros::lcd::set_text(2, std::to_string(radToDeg(pos.a) * -1));
+            pros::lcd::set_text(2, std::to_string((radToDeg(pos.a) - 360) * -1));
 
             pros::delay(10);
         }
@@ -120,11 +129,20 @@ namespace xlib {
         //uses left turn is positive, while pure pursuit and PID turns use
         //left turn is negative.
         tmp.p.y *= -1;
+        tmp.a -= (2 * okapi::pi);
         tmp.a *= -1;
 
         float storage = tmp.p.x;
         tmp.p.x = tmp.p.y;
         tmp.p.y = storage;
+
+        return tmp;
+    }
+
+    Odom::QPos Odom::getRawPos() {
+        posThreadSafety.take();
+        QPos tmp = pos;
+        posThreadSafety.give();
 
         return tmp;
     }
@@ -137,15 +155,15 @@ namespace xlib {
      * @param iheading Robot's current heading (converted to radians)
      */
     void Odom::setPos(QPoint ipos, QAngle iheading) {
-        pos.p = ipos;
-        pos.a = iheading.convert(radian);
+        pos.p = {ipos.y * -1, ipos.x};
+        pos.a = iheading.convert(radian) * -1;
     }
 
     /**
      * Returns the value of the inertial sensor for debugging
      */
     double Odom::getInternalIMU() {
-        return imu.get();
+        return imu1.get();
     }
 
     /**
@@ -168,10 +186,11 @@ namespace xlib {
      * @param leftVel Measures velocity of left side of drivetrain
      * @param rightVel Measures velocity of right side of drivetrain
      */
-    void Odom::withSensors(const ADIEncoder& right, const ADIEncoder& middle, const IMU& inertial, const RotationSensor& leftVel, const RotationSensor& rightVel) {
+    void Odom::withSensors(const ADIEncoder& right, const ADIEncoder& middle, const IMU& inertial1, const IMU& inertial2, const RotationSensor& leftVel, const RotationSensor& rightVel) {
         rightEncoder = right;
         middleEncoder = middle;
-        imu = inertial;
+        imu1 = inertial1;
+        imu2 = inertial2;
         leftRotation = leftVel;
         rightRotation = rightVel;
     }
@@ -191,7 +210,14 @@ namespace xlib {
      * Starts the internal thread (calls loop asynchronously)
      */
     void Odom::startLoop() {
-        //startTask();
+        rightEncoder.reset();
+        middleEncoder.reset();
+        imu1.reset();
+        startTask();
+    }
+
+    void Odom::stopLoop() {
+        stopTask();
     }
 
 }

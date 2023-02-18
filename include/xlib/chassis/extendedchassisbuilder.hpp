@@ -1,4 +1,5 @@
 #pragma once
+#include "pros/distance.hpp"
 #include "xlib/chassis/extendedchassis.hpp"
 
 namespace xlib {
@@ -15,11 +16,14 @@ namespace xlib {
         std::shared_ptr<ADIEncoder> middleEncoder;
         std::shared_ptr<RotationSensor> leftVel;
         std::shared_ptr<RotationSensor> rightVel;
-        std::shared_ptr<IMU> imu;
+        std::shared_ptr<IMU> imu1;
+        std::shared_ptr<IMU> imu2;
+        std::int8_t distanceSensor;
 
         IterativePosPIDController::Gains distanceGains;
         IterativePosPIDController::Gains turnGains;
         IterativePosPIDController::Gains angleGains;
+        IterativePosPIDController::Gains distanceSensorGains;
         std::vector<float> purePursuitGains;
 
         float maxVelocity;
@@ -43,9 +47,10 @@ namespace xlib {
 
         ExtendedChassisBuilder& withSensors(const ADIEncoder& iright, const ADIEncoder& imiddle, 
                                            const RotationSensor ileftVelocity, const RotationSensor irightVelocity, 
-                                           const IMU& inertial);
+                                           const IMU& inertial1, const IMU& inertial2,
+                                           const std::int8_t distance);
 
-        ExtendedChassisBuilder& withGains(const IterativePosPIDController::Gains& idistanceGains, const IterativePosPIDController::Gains& iturnGains, const IterativePosPIDController::Gains& iangleGains, const IterativePosPIDController::Gains& ipurePursuitGains);
+        ExtendedChassisBuilder& withGains(const IterativePosPIDController::Gains& idistanceGains, const IterativePosPIDController::Gains& iturnGains, const IterativePosPIDController::Gains& iangleGains, const IterativePosPIDController::Gains& idistanceSensorGains, const IterativePosPIDController::Gains& ipurePursuitGains);
 
         ExtendedChassisBuilder& withVelocityConstants(float maxVel, float maxAccel, float curveConstant, float maxChange);
 

@@ -1,5 +1,6 @@
 #include "main.h"
 #include "globals.hpp"
+#include "xlib/chassis/extendedchassis.hpp"
 #include "xlib/roller.hpp"
 
 //Boolean flags for use in driver control
@@ -15,7 +16,7 @@ bool adjusterState = false;
 //Holds the current target velocities for the flywheel
 std::pair<int, float> flywheelVel {2425, 0.866};
 std::pair<int, float> angledFlywheelVel = {2500,0.886};
-std::pair<int, float> cornerFlywheelVel = {2130, 0.405};
+std::pair<int, float> cornerFlywheelVel = {3600, 1.0};
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -25,8 +26,6 @@ std::pair<int, float> cornerFlywheelVel = {2130, 0.405};
  */
 
 void initialize() {
-	//pros::lcd::initialize();
-	//selector.setActive(false);
 }
 
 /**
@@ -89,12 +88,12 @@ void opcontrol() {
 			if(!fwToggle) {
 				//Otherwise, turn the flywheel on at  rpm
 				//fwToggle = true;
-				fw.moveVelocity(flywheelVel.first, flywheelVel.second);
+				fw.moveVelocity(flywheelVel);
 			}
 			else if(!fwToggle && adjusterState) {
 				//Set the flywheel to a higher velocity when the angle adjuster
 				//is in the high position
-				fw.moveVelocity(angledFlywheelVel.first, angledFlywheelVel.second);
+				fw.moveVelocity(angledFlywheelVel);
 			}
 		}
 		else if(master[ControllerDigital::L1].changedToReleased())
@@ -105,7 +104,7 @@ void opcontrol() {
 			if(!fwToggle) {
 				//Otherwise, turn the flywheel on at  rpm
 				//fwToggle = true;
-				fw.moveVelocity(cornerFlywheelVel.first, cornerFlywheelVel.second);
+				fw.moveVelocity(cornerFlywheelVel);
 			}
 		}
 		else if(master[ControllerDigital::right].changedToReleased())
@@ -170,10 +169,9 @@ void opcontrol() {
 			}
 		}
 
-		/*
 		if(master[ControllerDigital::left].changedToPressed())
 			autonomous();
-		*/
+		
 		
 
 		//Button for inverting the disc intake

@@ -44,7 +44,8 @@ private:
 
     ADIEncoder rightEncoder {'Z', 'Z'};
     ADIEncoder middleEncoder {'Z', 'Z'};
-    IMU imu {0};
+    IMU imu1 {0};
+    IMU imu2 {0};
     RotationSensor leftRotation {0};
     RotationSensor rightRotation {0};
 
@@ -52,30 +53,34 @@ private:
     double middleEncoderDistance;
     double wheelRadius;
 
-    double prevRightEncoderPos;
-    double prevMiddleEncoderPos;
-    double prevHeading;
+    double prevRightEncoderPos = 0.0;
+    double prevMiddleEncoderPos = 0.0;
+    double prevHeading = 0.0;
 
     double degToRad(double deg);
     double radToDeg(double rad);
     double degToIn(double deg);
     double DPSToRPM(double dps);
 
+    double average(std::vector<double> n);
+
     void loop();
 
 public:
     QPos getPos();
+    QPos getRawPos();
     void setPos(QPoint ipos, QAngle iheading);
 
     Velocity getVel();
 
     double getInternalIMU();
 
-    void withSensors(const ADIEncoder& right, const ADIEncoder& middle, const IMU& inertial, const RotationSensor& leftVel, const RotationSensor& rightVel);
+    void withSensors(const ADIEncoder& right, const ADIEncoder& middle, const IMU& inertial1, const IMU& inertial2, const RotationSensor& leftVel, const RotationSensor& rightVel);
 
     void setScales(const ChassisScales& iscales);
 
     void startLoop();
+    void stopLoop();
 };
 
 }

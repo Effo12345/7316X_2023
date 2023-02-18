@@ -70,6 +70,13 @@ namespace xlib {
 		float dotProduct(QPoint p) {
 			return (x * p.x) + (y * p.y);
 		}
+
+		/**
+		 * Returns the point value as a string for telemetry
+		 */
+		 std::string toString() {
+			return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";
+		 }
 	};
 
 }

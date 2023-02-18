@@ -1,4 +1,5 @@
 #include "xlib/chassis/extendedchassisbuilder.hpp"
+#include "okapi/impl/device/distanceSensor.hpp"
 
 namespace xlib {
 
@@ -56,12 +57,15 @@ namespace xlib {
      */
     ExtendedChassisBuilder& ExtendedChassisBuilder::withSensors(const ADIEncoder& iright, const ADIEncoder& imiddle, 
                                         const RotationSensor ileftVelocity, const RotationSensor irightVelocity, 
-                                        const IMU& inertial) {
+                                        const IMU& inertial1, const IMU& inertial2,
+                                        const std::int8_t distance) {
         rightEncoder = std::make_shared<ADIEncoder>(iright);
         middleEncoder = std::make_shared<ADIEncoder>(imiddle);
         leftVel = std::make_shared<RotationSensor>(ileftVelocity);
         rightVel = std::make_shared<RotationSensor>(irightVelocity);
-        imu = std::make_shared<IMU>(inertial);
+        imu1 = std::make_shared<IMU>(inertial1);
+        imu2 = std::make_shared<IMU>(inertial2);
+        distanceSensor = distance;
 
         return *this;
     }
@@ -75,10 +79,11 @@ namespace xlib {
      * @param ipurePursuitGains Pure pursuit controller's gains
      * @return An ongoing builder
      */
-    ExtendedChassisBuilder& ExtendedChassisBuilder::withGains(const IterativePosPIDController::Gains& idistanceGains, const IterativePosPIDController::Gains& iturnGains, const IterativePosPIDController::Gains& iangleGains, const IterativePosPIDController::Gains& ipurePursuitGains) {
+    ExtendedChassisBuilder& ExtendedChassisBuilder::withGains(const IterativePosPIDController::Gains& idistanceGains, const IterativePosPIDController::Gains& iturnGains, const IterativePosPIDController::Gains& iangleGains, const IterativePosPIDController::Gains& idistanceSensorGains, const IterativePosPIDController::Gains& ipurePursuitGains) {
         distanceGains = idistanceGains;
         turnGains = iturnGains;
         angleGains = iangleGains;
+        distanceSensorGains = idistanceSensorGains;
 
         purePursuitGains.push_back(ipurePursuitGains.kP);
         purePursuitGains.push_back(ipurePursuitGains.kI);
@@ -130,8 +135,8 @@ namespace xlib {
 
         return std::make_shared<ExtendedChassis>(*left, *right,
             gearset, scales,
-            *rightEncoder, *middleEncoder, *leftVel, *rightVel, *imu,
-            distanceGains, turnGains, angleGains, settings
+            *rightEncoder, *middleEncoder, *leftVel, *rightVel, *imu1, *imu2, distanceSensor,
+            distanceGains, turnGains, angleGains, distanceSensorGains, settings
         );
     }
 

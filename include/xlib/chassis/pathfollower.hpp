@@ -2,6 +2,7 @@
 #include "xlib/chassis/path.hpp"
 #include "xlib/chassis/odometry.hpp"
 #include "xlib/utils.hpp"
+#include "xlib/display/grapher.hpp"
 
 namespace xlib {
 
@@ -18,6 +19,8 @@ namespace xlib {
 
         float error = 0.0f;
         SettledUtil settled{std::make_unique<Timer>(), 2, 2, 100_ms};
+
+        Grapher grapher;
 
         //Generalized template function to get the sign of a number
         template <typename T> int sgn(T val) {

@@ -30,10 +30,13 @@ namespace xlib {
     }
 
     void Roller::skillsFlip2() {
-        everythingElse.moveVelocity(200);
+        int time = pros::millis();
+        everythingElse.moveVelocity(-100);
         everythingElse.tarePosition();
-        while(everythingElse.getPosition() < 50)
+        while(everythingElse.getPosition() > -100) {
+            if(pros::millis() - time > 4000)
             pros::delay(25);
+        }
         everythingElse.moveVelocity(0);
     }
 

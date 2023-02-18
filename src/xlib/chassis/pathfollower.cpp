@@ -102,7 +102,7 @@ namespace xlib {
         float lookaheadVectorMagnitude = lookaheadVector.getMagnitude();
         
         //Find the target heading after the proposed arc movement
-        float targetHeading = acos(headingVector.dotProduct(lookaheadVector) / lookaheadVectorMagnitude);
+        float targetHeading = std::acos(std::clamp(headingVector.dotProduct(lookaheadVector) / lookaheadVectorMagnitude, -1.0f, 1.0f));
 
         //Find whether turn is to the left or right (negative or positive)
         //TODO: multiply by -1
@@ -111,8 +111,11 @@ namespace xlib {
         //TODO: Change this to sin
         float x = sin(targetHeading) * lookaheadVectorMagnitude;
 
-        if(std::isnan(side * (2 * x) / pow(lookaheadDistance, 2)))
-            throw std::runtime_error("Bad curvature");
+        if(std::isnan(side * (2 * x) / pow(lookaheadDistance, 2))) {
+            std::string badCurve = "Bad curvature: " + std::to_string(side * (2 * x) / pow(lookaheadDistance, 2)); // + "\nTarget: " + std::to_string(targetHeading) + "\nSide: " + std::to_string(side) + "\nLookahead: " + std::to_string(lookaheadVectorMagnitude) + "\nHeaingVector: " + headingVector.toString() + "\nLookaheadVector: " + lookaheadVector.toString() + "\nDotProduct: " + std::to_string(dotProduct) + "\nErrno: " + strerror(errno) + "\naCos: " + std::to_string(headingVector.dotProduct(lookaheadVector) / lookaheadVectorMagnitude);
+            throw std::runtime_error(badCurve);
+            
+        }
 
         return side * (2 * x) / pow(lookaheadDistance, 2);
     }
@@ -130,12 +133,9 @@ namespace xlib {
         float leftVel = targetVelocity * (2 + (curvature * trackWidth)) / 2;
         float rightVel = targetVelocity * (2 - (curvature * trackWidth)) / 2;
 
-        if(isReversed) {
-            float tmp = leftVel;
+        if(isReversed)
+            return {-rightVel, -leftVel};
 
-            leftVel = -1 * rightVel;
-            rightVel = -1 * tmp;
-        }
         return {leftVel, rightVel};
     }
 
@@ -177,14 +177,11 @@ namespace xlib {
         float curvature = findArcCurvature(pos.p, pos.a, lookaheadPoint, settings->lookaheadDistance);
 
         float targetVelocity;
-        targetVelocity = path->velocity[closestPoint];
         //Calculate the target wheel speeds
-        /*
         if(settings->useRateLimiter)
             targetVelocity = limit.constrain(path->velocity[closestPoint], settings->maxRateChange);
         else
             targetVelocity = path->velocity[closestPoint];
-        */
 
         Odom::Velocity targetVelocities = calculateWheelVelocities(targetVelocity, curvature, settings->trackWidth, settings->reversed);
 
@@ -200,6 +197,9 @@ namespace xlib {
 
         Odom::Velocity feedB = (targetVelocities - measuredVel) * settings->kP;
 
+        //grapher.newData(targetVelocities.leftVel, 0);
+        //grapher.newData(measuredVel.leftVel, 1);
+
         std::string output = "Closest point: " + std::to_string(closestPoint) + "Top point: " + std::to_string(path->points.size());
         pros::lcd::set_text(3, output);
         std::string lookhaeadOutput = "Lookahead: (" + std::to_string(lookaheadPoint.x) + ", " + std::to_string(lookaheadPoint.y) + ")";
@@ -213,7 +213,7 @@ namespace xlib {
 
         //Divide by the absolute max velocity the drivetrain is capable of to 
         //normalize the value between [-1, 1].
-        return (targetVelocities) / settings->absoluteVelocityLimit;
+        return (feedForward + feedBack) / settings->absoluteVelocityLimit;
     }
 
     /**
@@ -254,6 +254,8 @@ namespace xlib {
         lastVelocities = {0, 0};
         error = 0.0;
         limit.reset();
+
+        //grapher.initGraph({0, 300}, 250);
     }
 
 }
