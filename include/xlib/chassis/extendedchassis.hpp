@@ -22,7 +22,13 @@ namespace xlib {
 		std::shared_ptr<IterativePosPIDController> headingPID;
 		std::shared_ptr<IterativePosPIDController> distancePID;
 
+		IterativePosPIDController::Gains discGrabGains{0.5, 0.0, 0.007};
+		std::shared_ptr<IterativePosPIDController> discGrabPID = std::make_shared<IterativePosPIDController>(discGrabGains, TimeUtilFactory::withSettledUtilParams(2, 2, 200_ms));
+
 		pros::Mutex motorThreadSafety;
+
+		QLength relativeTrackingDistance = 0.0 * inch;
+		double PIDvelocityLimit = 1.0;
 
 	public:
 		QPath::Settings settings;
@@ -49,6 +55,9 @@ namespace xlib {
 		void turnToAngle(QAngle targetAngle, QTime time);
 		void driveDistance(QLength target, QTime time);
 		void driveToDistanceFrom(QLength target, QTime time);
+		void discGrabOscilations(QLength target, QTime time);
+
+		void setPIDVelocityLimit(double velLimit);
 	};
 
 }

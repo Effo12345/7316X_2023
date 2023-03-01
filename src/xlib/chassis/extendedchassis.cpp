@@ -20,10 +20,13 @@ namespace xlib {
      * @param middle Center (perpendicular) tracking wheel encoder
      * @param leftVelocity Rotation sensor to measure left wheel velocity
      * @param rightVelocity Rotation sensor to measure right wheel velocity
-     * @param inertial Inertial sensor to get robot's yaw
+     * @param inertial1 First inertial sensor to get robot's yaw
+     * @param inertial2 Second inertial sensor to get robot's yaw
+     * @param distance Distance sensor to get distance to field perimeter
      * @param idistanceGains Translational PID controller gains
      * @param iturnGains Rotational PID controller gains
      * @param iangleGains Heading adjustment PID controller gains
+     * @param idistanceSensorGains Short distance PID controller gains
      * @param set Pure pursuit tuning constants
      */
     ExtendedChassis::ExtendedChassis (
@@ -46,10 +49,16 @@ namespace xlib {
         distancePID = std::make_shared<IterativePosPIDController>(idistanceSensorGains, TimeUtilFactory::withSettledUtilParams(0.25, 0.25, 200_ms));
     }
 
+    /*
+     * Start odometer's internal thread
+     */
     void ExtendedChassis::startOdom() {
         odometer.startLoop();
     }
 
+    /*
+     * Stop odometer's internal thread
+     */
     void ExtendedChassis::stopOdom() {
         odometer.stopLoop();
     }
@@ -152,19 +161,18 @@ namespace xlib {
         motorThreadSafety.take();
 
         do {
-            (drive->getModel())->arcade(0, turnPID->step(-rescale180(targetAngle.convert(degree)- (odometer.getPos().a * radian).convert(degree))));
-            //pros::lcd::set_text(1, std::to_string(odometer.getPos().a));
-            //std::cout << odometer.getPos().a;
+            (drive->getModel())->arcade(0, std::clamp(turnPID->step(-rescale180(targetAngle.convert(degree)- (odometer.getPos().a * radian).convert(degree))), -PIDvelocityLimit, PIDvelocityLimit));
             pros::delay(10);
         }while(!turnPID->isSettled() && timer->getDtFromMark() < time);
 
         (drive->getModel())->stop();
         (drive->getModel())->resetSensors();
+        relativeTrackingDistance = odometer.getRightTrack();
         motorThreadSafety.give();
     }
 
     /**
-     * Drive a distance using motor-encoder translational PID
+     * Drive a distance using parallel tracking wheel translational PID
      *
      * @param target Distance to drive (typically in inches)
      * @param time Time limit if the loop doesn't reach the target value
@@ -181,9 +189,9 @@ namespace xlib {
         motorThreadSafety.take();
 
         do {
-            double distance = tickToIn((static_cast<double>((drive->getModel())->getSensorVals()[0] + (drive->getModel())->getSensorVals()[1]) / 2), drive->getChassisScales(), drive->getGearsetRatioPair());
+            double distance = (odometer.getRightTrack() - relativeTrackingDistance).convert(inch);
             double error = target.convert(inch) - distance;
-            (drive->getModel())->arcade(movePID->step(-error), headingPID->step(odometer.getInternalIMU()));
+            (drive->getModel())->arcade(std::clamp(movePID->step(-error), -PIDvelocityLimit, PIDvelocityLimit), headingPID->step(odometer.getInternalIMU()));
             pros::delay(10);
         }while(!movePID->isSettled() && timer->getDtFromMark() < time);
 
@@ -191,6 +199,13 @@ namespace xlib {
         motorThreadSafety.give();
     }
 
+    /**
+     * Drive (a short distance <6 inches) to a specific distance from the field
+     * perimter using the distance sensor
+     *
+     * @param target Desired distance from the field perimeter (inch)
+     * @param time Time limit if the loop doesn't reach target value
+     */
     void ExtendedChassis::driveToDistanceFrom(QLength target, QTime time) {
         movePID->reset();
         headingPID->reset();
@@ -212,6 +227,40 @@ namespace xlib {
 
         (drive->getModel())->stop();
         motorThreadSafety.give();
+    }
+
+    /**
+     * Drive a distance using parallel tracking wheel translational PID. 
+     * Oscilate the robot side to side to intake discs more effectively using
+     * a rotation PID
+     *
+     * @param target Distance to drive (inch)
+     * @param time Time limit if the loop doesn't reah target value
+     */
+    void ExtendedChassis::discGrabOscilations(QLength target, QTime time) {
+        movePID->reset();
+        discGrabPID->reset();
+
+        movePID->setTarget(0);
+        discGrabPID->setTarget(odometer.getInternalIMU() + 1);
+
+        auto timer = TimeUtilFactory().createDefault().getTimer();
+        timer->placeMark();
+        motorThreadSafety.take();
+
+        do {
+            double distance = (odometer.getRightTrack() - relativeTrackingDistance).convert(inch);
+            double error = target.convert(inch) - distance;
+            (drive->getModel())->arcade(std::clamp(movePID->step(-error), -PIDvelocityLimit, PIDvelocityLimit), discGrabPID->step(odometer.getInternalIMU()));
+            pros::delay(10);
+        }while(!movePID->isSettled() && timer->getDtFromMark() < time);
+
+        (drive->getModel())->stop();
+        motorThreadSafety.give();
+    }
+
+    void ExtendedChassis::setPIDVelocityLimit(double velLimit) {
+        PIDvelocityLimit = std::clamp(velLimit, 0.0, 1.0);
     }
 
 }

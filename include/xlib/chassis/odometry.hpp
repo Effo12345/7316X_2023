@@ -71,6 +71,8 @@ public:
     QPos getRawPos();
     void setPos(QPoint ipos, QAngle iheading);
 
+    QLength getRightTrack();
+
     Velocity getVel();
 
     double getInternalIMU();

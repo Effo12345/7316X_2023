@@ -24,7 +24,7 @@ std::shared_ptr<ExtendedChassis> chassis = ExtendedChassisBuilder()
     .build();
 
 //Custom flywheel object to implement TBH control
-Flywheel fw(1, 0.00028f, selector);
+Flywheel fw(1, 0.0003f, selector);
 
 //Motor that runs intake, indexer, and roller mechanism
 Motor everythingElse(15, true, AbstractMotor::gearset::red, 
@@ -36,7 +36,7 @@ Pneumatics angleAdjuster(7, false);
 
 //Custom auton selector object. Takes button names and functions to run
 Selector selector({
-    {{"Left roller", WPL}, {"Left full", FullL}},
-    {{"Skills", Skills}},
-    {{"Right roller", WPR}}
+    {{"Left roller", WPL}, {"Left full", FullL}, {"Full WP", FullWP}},
+    {{"Skills", Skills}, {"Safety", SafetySkills}},
+    {{"Right roller", WPR}, {"Right Full", FullR}}
 });

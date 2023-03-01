@@ -86,11 +86,13 @@ namespace xlib {
         active = true;
     }
 
+    //Stop the flywheel (voltage control)
     void Flywheel::stop() {
         moveVoltage(0);
         //fclose(tbhTelem);
     }
 
+    //Run the flywheel in reverse to unjam and for match loads
     void Flywheel::toggleReverse() {
         if(!active)
             init();

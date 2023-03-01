@@ -31,6 +31,11 @@ namespace xlib {
         return dps / 0.166667;
     }   
 
+    /**
+     * Return the average of values in the input vector
+     *
+     * @param n Vector of values to be averaged
+     */
     double Odom::average(std::vector<double> n) {
         double runningSum;
 
@@ -139,6 +144,12 @@ namespace xlib {
         return tmp;
     }
 
+    /**
+     * Return the position in its original coordinates (left turn is positive,
+     * swap x and y)
+     *
+     * @return Unprocessed global position struct (inch, inch, radian)
+     */
     Odom::QPos Odom::getRawPos() {
         posThreadSafety.take();
         QPos tmp = pos;
@@ -174,6 +185,15 @@ namespace xlib {
      */
     Odom::Velocity Odom::getVel() {
         return {DPSToRPM(leftRotation.getVelocity()), DPSToRPM(rightRotation.getVelocity())};
+    }
+
+    /**
+     * Return the internal tracking wheel position
+     *
+     * @return Current tracking wheel position (inches)
+     */
+    QLength Odom::getRightTrack() {
+        return degToIn(rightEncoder.get()) * inch;
     }
 
     /**
@@ -216,6 +236,9 @@ namespace xlib {
         startTask();
     }
 
+    /**
+     * Stops the internal thread
+     */
     void Odom::stopLoop() {
         stopTask();
     }
