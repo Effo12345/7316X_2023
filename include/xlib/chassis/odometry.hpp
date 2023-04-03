@@ -40,6 +40,7 @@ private:
     pros::Mutex posThreadSafety;
 
     QPos pos {{0, 0}, 0};
+    float headingOffset {0.0f};
     Velocity vel;
 
     ADIEncoder rightEncoder {'Z', 'Z'};

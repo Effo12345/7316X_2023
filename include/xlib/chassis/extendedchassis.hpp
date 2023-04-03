@@ -43,12 +43,10 @@ namespace xlib {
 
 		std::shared_ptr<ChassisModel> getModel();
 
-		void startOdom();
+		void startOdom(QPoint ipos = {0, 0}, QAngle iheading = 0_deg);
 		void stopOdom();
 
 		void followNewPath(QPath path);
-
-		void setOdomPos(QPoint ipos, QAngle iheading);
 
 		void turnToPoint(QPoint ipoint, QTime time, bool ireversed = false);
 

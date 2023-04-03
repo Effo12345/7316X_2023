@@ -4,6 +4,7 @@
 #include "xlib/flywheel.hpp"
 #include "xlib/display/selector.hpp"
 #include "xlib/chassis/extendedchassisbuilder.hpp"
+#include "xlib/primarymotor.hpp"
 #include "autonomous.hpp"
 
 //Constants
@@ -13,7 +14,7 @@ const int MAX_VOLTAGE = 12000;
 extern Controller master;
 
 extern Flywheel fw;
-extern Motor everythingElse;
+extern PrimaryMotor primary;
 
 extern Pneumatics expansion;
 extern Pneumatics angleAdjuster;

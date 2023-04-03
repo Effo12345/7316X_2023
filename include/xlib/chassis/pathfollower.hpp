@@ -26,6 +26,13 @@ namespace xlib {
         template <typename T> int sgn(T val) {
             return (T(0) < val) - (val < T(0));
         }
+
+        int closestPoint = 1;
+        int intersectIndex = 0;
+        float fractionalIndex = 0.0f;
+
+        QPoint lookaheadPoint;
+        float lookaheadDistance = 15;
         
         int findClosestPointIndex(std::vector<QPoint>& path, QPoint pos, int startIndex = 0);
 

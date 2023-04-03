@@ -73,7 +73,7 @@ namespace xlib {
             prevMiddleEncoderPos = sPos;
 
             //Calculate current absolute heading in radians
-            double heading = degToRad(360 - imu1.get());
+            double heading = degToRad(360 - imu1.get()) + headingOffset;
 
             //Calculate change in angle
             double deltaTheta = heading - prevHeading;
@@ -166,8 +166,8 @@ namespace xlib {
      * @param iheading Robot's current heading (converted to radians)
      */
     void Odom::setPos(QPoint ipos, QAngle iheading) {
-        pos.p = {ipos.y * -1, ipos.x};
-        pos.a = iheading.convert(radian) * -1;
+        pos.p = {ipos.y, ipos.x * -1};
+        headingOffset = prevHeading = pos.a = iheading.convert(radian) * -1;
     }
 
     /**

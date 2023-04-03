@@ -1,9 +1,10 @@
 #include "main.h"
 #include "globals.hpp"
+#include "pros/llemu.hpp"
 #include "xlib/chassis/extendedchassis.hpp"
-#include "xlib/roller.hpp"
 
 //Boolean flags for use in driver control
+/*
 bool fwToggle = false;
 int intakeToggle = false;
 bool rollerToggle = false;
@@ -12,11 +13,17 @@ bool curvatureToggle = false;
 bool autonSelectorActive = true;
 bool hasExpanded = false;
 bool adjusterState = false;
+*/
+bool fwToggle = false;
+int intakeState = false;
+bool adjusterState = false;
+bool hasExpanded = false;
 
 //Holds the current target velocities for the flywheel
 std::pair<int, float> flywheelVel {2425, 0.866};
 std::pair<int, float> angledFlywheelVel = {2500,0.886};
-std::pair<int, float> cornerFlywheelVel = {3600, 1.0};
+std::pair<int, float> maxFlywheelVel {3600, 1.0};
+std::pair<int, float> flywheelVelocitiesL1[2] {flywheelVel, angledFlywheelVel};
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -26,6 +33,8 @@ std::pair<int, float> cornerFlywheelVel = {3600, 1.0};
  */
 
 void initialize() {
+	selector.setActive(false);
+	pros::lcd::initialize();
 }
 
 /**
@@ -59,7 +68,17 @@ void competition_initialize() {}
  */
 void autonomous() {	
 	//Run the auton the user selected based on the output of the Selector class
-	selector.runSelection();
+	//selector.runSelection();
+
+	chassis->startOdom({11.62, -65.34}, 0_deg);
+	chassis->settings.reversed = false;
+	chassis->followNewPath({{
+		{11.62, -65.34},
+        {-15.87, -41.24},
+        {-13.04, 2.13},
+        {38.83, 0.71},
+        {16.72, 57.4}
+	}});
 }
 
 /**
@@ -77,138 +96,101 @@ void autonomous() {
  */
 void opcontrol() {
 	while(true) {
-		//Button to activate the indexer
-		if(master[ControllerDigital::L1].isPressed()) {
-			if(fwToggle)
-				indexerToggle = true;
+		if(master[ControllerDigital::L1].changedToPressed() && !fwToggle) {
+			fw.moveVelocity(flywheelVelocitiesL1[adjusterState]);
 		}
-
-		//Button to turn the flywheel on and toggle the indexer
-		if(master[ControllerDigital::L1].changedToPressed()) {
-			if(!fwToggle) {
-				//Otherwise, turn the flywheel on at  rpm
-				//fwToggle = true;
-				fw.moveVelocity(flywheelVel);
-			}
-			else if(!fwToggle && adjusterState) {
-				//Set the flywheel to a higher velocity when the angle adjuster
-				//is in the high position
-				fw.moveVelocity(angledFlywheelVel);
-			}
+		else if(master[ControllerDigital::L1].isPressed() && fwToggle) {
+			primary.setNormalizedVelocity(-1.0);
 		}
-		else if(master[ControllerDigital::L1].changedToReleased())
+		
+		if(master[ControllerDigital::L1].changedToReleased()) {
 			fwToggle = true;
-
-		//Button to set the flywheel to corner speed and toggle indexer
-		if(master[ControllerDigital::right].changedToPressed()) {
-			if(!fwToggle) {
-				//Otherwise, turn the flywheel on at  rpm
-				//fwToggle = true;
-				fw.moveVelocity(cornerFlywheelVel);
-			}
+			primary.setNormalizedVelocity(intakeState);
 		}
-		else if(master[ControllerDigital::right].changedToReleased())
-			fwToggle = true;
 
-		//Button to turn the flywheel off
 		if(master[ControllerDigital::L2].changedToPressed()) {
 			fwToggle = false;
 			fw.moveVelocity(0);
 		}
 
-		//Reverse the flywheel and intake in case a disc gets stuck
-		if(master[ControllerDigital::down].changedToPressed()) {
-			intakeToggle = true;
-			fw.toggleReverse();
-		}
-		else if(master[ControllerDigital::down].changedToReleased()) {
-			intakeToggle = false;
-			fw.toggleReverse();
+		if(master[ControllerDigital::R1].changedToPressed()) {
+			intakeState = !intakeState;
+			primary.setNormalizedVelocity(intakeState);
 		}
 
-
-		//Button to toggle disc intake
-		if(master[ControllerDigital::R1].changedToPressed())
-			intakeToggle = !intakeToggle;
-
-		//Button to set the roller mech
-		if(master[ControllerDigital::R2].isPressed()) {
-			rollerToggle = true;
-			intakeToggle = false;
+		if(master[ControllerDigital::R2].changedToPressed()) {
+			primary.setNormalizedVelocity(1.0);
 		}
-		else {
-			rollerToggle = false;
+		else if(master[ControllerDigital::R2].changedToReleased()) {
+			intakeState = false;
+			primary.setNormalizedVelocity(0);
 		}
 
-		//Trigger expansion by pressing all 4 shoulder buttons
-		//This ensures it will never be triggered accidentally
-		if( !hasExpanded &&
-			master[ControllerDigital::L1].isPressed() &&
-			master[ControllerDigital::L2].isPressed() &&
-			master[ControllerDigital::R1].isPressed() &&
-			master[ControllerDigital::R2].isPressed() ) {
-				expansion.toggle();
-				hasExpanded = true;
-				fwToggle = false;
-				rollerToggle = false;
-				fw.moveVelocity(0);	
-				intakeToggle = false;
-				master.rumble("-");
-		} 
+		if(master[ControllerDigital::A].changedToPressed()) {
+			primary.setNormalizedVelocity(intakeState *= -1);
+		}
 
-		
 		if(master[ControllerDigital::up].changedToPressed()) {
 			adjusterState = !adjusterState;
-			angleAdjuster.set(adjusterState);
-
-			if(fwToggle && adjusterState) {
-				fw.moveVelocity(angledFlywheelVel.first, angledFlywheelVel.second);
-			}
-			else if(fwToggle && !adjusterState) {
-				fw.moveVelocity(flywheelVel.first, flywheelVel.second);
-			}
+			angleAdjuster.toggle();
+			fw.moveVelocity(flywheelVelocitiesL1[adjusterState]);
 		}
+
+		if(master[ControllerDigital::X].changedToPressed()) {
+			fw.moveVelocity(maxFlywheelVel);
+			fwToggle = true;
+		}
+
+		if(master[ControllerDigital::L1].isPressed() &&
+		   master[ControllerDigital::L2].isPressed() &&
+		   master[ControllerDigital::R1].isPressed() &&
+		   master[ControllerDigital::R2].isPressed() &&
+		   !hasExpanded) {
+			hasExpanded = true;
+			primary.setNormalizedVelocity(intakeState = false);
+			fw.moveVelocity(fwToggle = false);
+			expansion.toggle();
+		   }
+
+		chassis->getModel()->tank (
+			master.getAnalog(ControllerAnalog::leftY),
+			master.getAnalog(ControllerAnalog::rightY)
+		);
 
 		if(master[ControllerDigital::left].changedToPressed())
-			autonomous();
-		
-		
-
-		//Button for inverting the disc intake
-		if(master[ControllerDigital::A].changedToPressed())
-			intakeToggle *= -1;
-
-		//Button to toggle between tank control and curvature control
-		if(master[ControllerDigital::Y].changedToPressed())
-			curvatureToggle = !curvatureToggle;
-
-		//Using okapilib's chassis object, set the wheel velocity based on 
-		//the sticks and the selected control scheme
-		if(curvatureToggle) {
-			chassis->getModel()->curvature (
-				master.getAnalog(ControllerAnalog::leftY),
-				master.getAnalog(ControllerAnalog::rightX)
-			);
-		}
-		else {
-			chassis->getModel()->tank (
-				master.getAnalog(ControllerAnalog::leftY),
-				master.getAnalog(ControllerAnalog::rightY)
-			);
-		}
-
-		//Set the power of the everythingElse motor based on values calculated above
-		if(indexerToggle)
-			everythingElse.moveVoltage(-12000);
-		else if(intakeToggle || intakeToggle == -1)
-			everythingElse.moveVoltage(12000 * intakeToggle);
-		else if(rollerToggle)
-			everythingElse.moveVoltage(12000);
-		else
-		 everythingElse.moveVoltage(0);
-
-		indexerToggle = false;
+			primary.staggeredIndex(3, 1000_ms);
 
 		pros::delay(20);
 	}
 }
+
+
+/*
+if l1 (changed pressed) && !flywheel toggle
+	start flywheel;
+	flywheelToggle = true;
+else if l1(changed to released) && flywheel toggle
+	readyToIndex = true;
+
+
+if l1 (changed to pressed) && readyToIndex
+	set negative;
+else if l1 (changed to released) && readyToIndex
+	set intakeToggle;
+
+if r1 (changed to pressed)
+	intakeToggle = !intakeToggle;
+	set intakeToggle;
+
+if r2 (changed to pressed)
+	set positive;
+else if r2 (changed to released)
+	intakeToggle = false;
+	set stop;
+
+if l1 && l2 && r1 && r2 && hasExpanded
+	hasExpanded = true;
+	expansion.toggle;
+
+	
+*/

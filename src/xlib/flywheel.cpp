@@ -1,4 +1,5 @@
 #include "xlib/flywheel.hpp"
+#include "okapi/api/filter/emaFilter.hpp"
 
 /*
  * The flywheel class implements the Take Back Half (TBH) velocity control
@@ -47,7 +48,10 @@ namespace xlib {
                 continue;
             }
 
-            currentError = targetVelocity - (getActualVelocity() * 18);
+            float measuredVel = getActualVelocity() * 18;
+            float filteredVel = velFilter->filter(measuredVel);
+
+            currentError = targetVelocity - filteredVel;
 
             drive = drive + (currentError * gain);
 
@@ -68,11 +72,9 @@ namespace xlib {
             moveVoltage(drive * 12000);
 
             grapher.newData(targetVelocity, 0);
-            grapher.newData((getActualVelocity() * 18), 1);
-            pros::lcd::set_text(0, "Target: " 
-                + std::to_string(targetVelocity));
-            pros::lcd::set_text(1, "Actual: " 
-                + std::to_string(getActualVelocity()));
+            grapher.newData(measuredVel, 1);
+            grapher.newData(filteredVel, 2);
+            grapher.newData(drive * 3600, 3);
 
             pros::delay(20);
         }
@@ -100,7 +102,9 @@ namespace xlib {
         doBackSpin = !doBackSpin;
     }
 
-    Flywheel::Flywheel(std::int8_t iport, float igain, Selector& sel)
+    Flywheel::Flywheel(std::int8_t iport, float igain, float ifilterAlpha, Selector& sel)
         : okapi::Motor{iport}, //Calls the constructor for okapi::Motor 
-          gain{igain}, selector{sel} {}
+          gain{igain}, selector{sel} {
+            velFilter = std::make_shared<okapi::EmaFilter>(ifilterAlpha);
+          }
 }

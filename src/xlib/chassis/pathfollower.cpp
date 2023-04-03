@@ -70,10 +70,13 @@ namespace xlib {
                 intersection = path[i] + d * t2;
                 proposedFractionalIndex = i + t2;
             }
-            else {
+            else if(t1 >=0 && t1 <= 1){
                 //Calculate for t1 intersection
                 intersection = path[i] + d * t1;
                 proposedFractionalIndex = i + t1;
+            }
+            else {
+                continue;
             }
 
             if(proposedFractionalIndex > fractionalIndex) {
@@ -214,48 +217,235 @@ namespace xlib {
         //Divide by the absolute max velocity the drivetrain is capable of to 
         //normalize the value between [-1, 1].
         return (feedForward + feedBack) / settings->absoluteVelocityLimit;
+
+
+        /*
+        okapi::MotorGroup leftMotors({12, -13, 14});
+        okapi::MotorGroup rightMotors({-8, 9, -10});
+
+        //while loop starts here
+        //while(true) {
+            //Copy position for thread protection
+            Odom::QPos position;
+            position.p.x = pos.p.x;
+            position.p.y = pos.p.y;
+            position.a = pos.a;
+
+            //If reverse pathing is desired,
+            //make the robot appear reversed so curvature computes correctly
+            if(settings->reversed) {
+                position.a += 3.14159265f;
+            }
+
+
+
+            //=================================================================================
+            //Find closest point on the path
+            float lastClosestDistance = 100;
+            for(int i = closestPoint; i < path->points.size(); i++) {
+                float distance = sqrt(pow(path->points[i].x - position.p.x, 2) + pow(path->points[i].y - position.p.y, 2));
+
+                if(distance < lastClosestDistance) {
+                    lastClosestDistance = distance;
+                    closestPoint = i;
+                }
+            }
+
+            
+            //=================================================================================
+            //Find intersection (lookahead point)
+            for(int i = intersectIndex; i < path->points.size() - 1; i++) {
+                //E is the starting point of the vector
+                //L is the end point of the vector
+                //C is the center of the circle (with r lookahead distance)
+
+                //d = L - E
+                QPoint d;
+                d.x = path->points[i + 1].x - path->points[i].x;
+                d.y = path->points[i + 1].y - path->points[i].y;
+
+                //f = E - C
+                QPoint f;
+                f.x = path->points[i].x - position.p.x;
+                f.y = path->points[i].y - position.p.y;
+
+                //a = d.DotProduct(d)
+                float a = (d.x * d.x) + (d.y * d.y);
+                //b = 2 * f.DotProduct(d)
+                float b = 2 * ((f.x * d.x) + (f.y * d.y));
+                //c = f.DotProduct(f) - r * r
+                //r is the radius of the sphere, the lookahead distance
+                float c = ((f.x * f.x) + (f.y * f.y)) - (lookaheadDistance * lookaheadDistance);
+
+                //discriminant = b * b - 4 * a * c
+                float discriminant = (b * b) - (4 * a * c);
+
+                if(discriminant < 0) {
+                    //No intersection
+                }
+                else {
+                    discriminant = sqrt(discriminant);
+
+                    float t1 = (-b - discriminant) / (2 * a);
+                    float t2 = (-b + discriminant) / (2 * a);
+
+                    //T2 intersection is always further along the path
+                    if(t2 >= 0 && t2 <= 1) {
+                        //return t2 intersection
+                        QPoint intersection;
+                        intersection.x = path->points[i].x + t2 * d.x;
+                        intersection.y = path->points[i].y + t2 * d.y;
+
+                        //Find the fractional index of the intersection and compare it to the previous lookahead point
+                        float tempFractionalIndex = i + t2;
+                        if(tempFractionalIndex > fractionalIndex) {
+                            //If the fractional index is greater,
+                            //set the new values for the next loop and the rest of the algorithm
+                            fractionalIndex = tempFractionalIndex;
+                            intersectIndex = i;
+                            lookaheadPoint.x = intersection.x;
+                            lookaheadPoint.y = intersection.y;
+
+                            //Cancel the loop as the value has been found
+                            break;
+                        }
+                    }
+                    if(t1 >= 0 && t1 <= 1) {
+                        //return t1 intersection
+                        QPoint intersection;
+                        intersection.x = path->points[i].x + t1 * d.x;
+                        intersection.y = path->points[i].y + t1 * d.y;
+
+                        //Find the fractional index of the intersection and compare it to the previous lookahead point
+                        float tempFractionalIndex = i + t1;
+                        if(tempFractionalIndex > fractionalIndex) {
+                            //If the fractional index is greater,
+                            //set the new values for the next loop and the rest of the algorithm
+                            fractionalIndex = tempFractionalIndex;
+                            intersectIndex = i;
+                            lookaheadPoint.x = intersection.x;
+                            lookaheadPoint.y = intersection.y;
+
+                            //Cancel the loop as the value has been found
+                            break;
+                        }
+                    }
+                }
+            }
+
+
+
+            //=================================================================================
+            //Calculate curvature of movement arc
+            QPoint headingVector;
+            headingVector.x = sin(position.a);
+            headingVector.y = cos(position.a);
+
+            QPoint lookaheadVector;
+            lookaheadVector.x = lookaheadPoint.x - position.p.x;
+            lookaheadVector.y = lookaheadPoint.y - position.p.y;
+            float lookaheadVectorMagnitude = sqrt(pow(lookaheadVector.x, 2) + pow(lookaheadVector.y, 2));
+
+            float targetHeading = acos((headingVector.x * lookaheadVector.x
+                                    + headingVector.y * lookaheadVector.y)
+                                    / lookaheadVectorMagnitude);
+
+            //Find whether the turn is to the left or right (negative or positive)
+            int side = sgn(((-1 * headingVector.y) * lookaheadVector.x) + (headingVector.x * lookaheadVector.y)) * -1;
+
+            float x = sin(targetHeading) * lookaheadVectorMagnitude;
+
+            float curvature = side * (2 * x) / pow(lookaheadDistance, 2);
+
+
+
+
+            //=================================================================================
+            //Compute wheel velocities
+            //L = target left wheel's speed
+            //R = target right wheel's speed
+            //T = track width
+            float T = 17; //inches
+
+            //Rate limiter call
+            //TODO: Fix rate limiter
+            float targetVelocity;
+            targetVelocity = path->velocity[closestPoint];
+
+
+            //Target left wheel speed
+            float L = targetVelocity * (2 + (curvature * T)) / 2;
+            float R = targetVelocity * (2 - (curvature * T)) / 2;
+
+            if(settings->reversed) {
+                float tmp = L;
+
+                L = -1 * R;
+                R = -1 * tmp;
+            }
+
+
+            L /= settings->absoluteVelocityLimit;
+            R /= settings->absoluteVelocityLimit;
+
+            Odom::Velocity returnVel {L, R};
+            return(returnVel);
+
+
+            //=================================================================================
+            //Telemtry for output data
+            std::string output = "Closest point: " + std::to_string(closestPoint) + "Top point: " + std::to_string(path->points.size());
+            pros::lcd::set_text(4, output);
+            std::string lookAheadOutput = "Lookahead: (" + std::to_string(lookaheadPoint.x) + ", " + std::to_string(lookaheadPoint.y) + ")";
+            pros::lcd::set_text(5, lookAheadOutput);
+            std::string targetHeadingOut = "Target Heading: " + std::to_string(targetHeading);
+            pros::lcd::set_text(7, targetHeadingOut);
+            std::string curvatureOutput = "Curvature: " + std::to_string(curvature);
+            pros::lcd::set_text(7, curvatureOutput);
+        //}
+        */
     }
 
-    /**
-     * A public function for other classes to run followPath in a loop
-     */
-    Odom::Velocity PathFollower::step(Odom::QPos pos, Odom::Velocity vel) {
-        return followPath(pos, vel);
-    }
+        /**
+        * A public function for other classes to run followPath in a loop
+        */
+        Odom::Velocity PathFollower::step(Odom::QPos pos, Odom::Velocity vel) {
+            return followPath(pos, vel);
+        }
 
-    /**
-     * Uses an okapi settled util to determine if the robot has stopped moving
-     *
-     * @return Whether the robot has settled from its current movement
-     */
-    bool PathFollower::isSettled() {
-        return settled.isSettled(error);
-    }
+        /**
+        * Uses an okapi settled util to determine if the robot has stopped moving
+        *
+        * @return Whether the robot has settled from its current movement
+        */
+        bool PathFollower::isSettled() {
+            return settled.isSettled(error);
+        }
 
-    /**
-     * Define a new path to follow and sets any necessary class-scoped variables
-     * 
-     * @param qpath New path to follow
-     * @param set New configurations to define robot movement
-     * @param pos The robot's current position
-     */
-    void PathFollower::setNewPath(QPath* qpath, QPath::Settings* set, Odom::QPos pos) {
-        //Set internal path and settings objects
-        path = qpath;
-        settings = set;
+        /**
+        * Define a new path to follow and sets any necessary class-scoped variables
+        * 
+        * @param qpath New path to follow
+        * @param set New configurations to define robot movement
+        * @param pos The robot's current position
+        */
+        void PathFollower::setNewPath(QPath* qpath, QPath::Settings* set, Odom::QPos pos) {
+            //Set internal path and settings objects
+            path = qpath;
+            settings = set;
 
-        //Reset variables with class scope to their default values
-        //The robot's current position is used as the default lookahead point so 
-        //the robot doesn't cross the center line during auton in case the algorithm
-        //fails to find a lookahead point
-        lastClosestPointIndex = 0.0;
-        lastFractionalIndex = 0.0;
-        lastLookahead = pos.p;
-        lastVelocities = {0, 0};
-        error = 0.0;
-        limit.reset();
+            //Reset variables with class scope to their default values
+            //The robot's current position is used as the default lookahead point so 
+            //the robot doesn't cross the center line during auton in case the algorithm
+            //fails to find a lookahead point
+            lastClosestPointIndex = 0.0;
+            lastFractionalIndex = 0.0;
+            lastLookahead = pos.p;
+            lastVelocities = {0, 0};
+            error = 0.0;
+            limit.reset();
 
-        //grapher.initGraph({0, 300}, 250);
-    }
+            //grapher.initGraph({0, 300}, 250);
+        }
 
 }

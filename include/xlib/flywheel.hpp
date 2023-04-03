@@ -1,4 +1,5 @@
 #pragma once
+#include "okapi/api/filter/emaFilter.hpp"
 #include "okapi/impl/device/motor/motor.hpp"
 #include "taskwrapper.hpp"
 #include "xlib/display/grapher.hpp"
@@ -17,6 +18,8 @@ namespace xlib {
 
         double gain = 0.0f;
 
+        std::shared_ptr<okapi::EmaFilter> velFilter;
+
         bool active = false;
         bool doBackSpin = false;
 
@@ -33,7 +36,7 @@ namespace xlib {
 
     public:
 
-        Flywheel(std::int8_t iport, float igain, Selector& sel);
+        Flywheel(std::int8_t iport, float igain, float ifilterAlpha, Selector& sel);
 
         void moveVelocity(int velocity, float predicted_drive = -1);
         void moveVelocity(std::pair<int, float> vel);

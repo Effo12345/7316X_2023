@@ -52,7 +52,8 @@ namespace xlib {
     /*
      * Start odometer's internal thread
      */
-    void ExtendedChassis::startOdom() {
+    void ExtendedChassis::startOdom(QPoint ipos, QAngle iheading) {
+        odometer.setPos(ipos, iheading);
         odometer.startLoop();
     }
 
@@ -77,22 +78,19 @@ namespace xlib {
      * @param path Input waypoints to be processed and followed
      */
     void ExtendedChassis::followNewPath(QPath path) {
-        int timesRun = 0;
 		pathGenerator.processWaypoints(path, settings);
 		pathFollower.setNewPath(&path, &settings, odometer.getPos());
         
         //Take a mutex to ensure only one function can control the drivetrain
         //motors at a time
         motorThreadSafety.take();
-		while(!pathFollower.isSettled()) {
+		while(true) {
 			Odom::Velocity vel = pathFollower.step(odometer.getPos(), odometer.getVel());
 			(drive->getModel())->tank(vel.leftVel, vel.rightVel);
 
-            timesRun++;
 			pros::delay(25);
 		}
         motorThreadSafety.give();
-        std::cout << timesRun;
 	}
 
 
@@ -131,16 +129,6 @@ namespace xlib {
         pros::lcd::set_text(7, headingOutput);
         
         turnToAngle(-1 * targetHeading * radian, time);
-    }
-
-    /**
-     * Set the initial odometry position for the start of auton
-     * 
-     * @param ipos Starting position (x, y)
-     * @param iheading Starting heading (degrees)
-     */
-    void ExtendedChassis::setOdomPos(QPoint ipos, QAngle iheading) {
-        odometer.setPos(ipos, iheading);
     }
 
     /**
