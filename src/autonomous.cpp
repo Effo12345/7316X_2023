@@ -40,7 +40,7 @@
         chassis->driveDistance(22_in, 5_s);
         //Oscilate to intake the stack more effectively
         chassis->setPIDVelocityLimit(0.9);
-        chassis->discGrabOscilations(48_in, 1_s);
+        //chassis->discGrabOscilations(48_in, 1_s);
         pros::delay(200);
         //Navigate to face the high goal
         chassis->turnToAngle(-29_deg, 1_s);
@@ -143,7 +143,7 @@
         chassis->driveDistance(22_in, 5_s);
         chassis->setPIDVelocityLimit(0.9);
         //Oscilte the intake to grab discs more efficiently
-        chassis->discGrabOscilations(48_in, 1_s);
+        //chassis->discGrabOscilations(48_in, 1_s);
         pros::delay(200);
         //Navigate to face the high goal and shoot a volley
         chassis->turnToAngle(-29_deg, 1_s);

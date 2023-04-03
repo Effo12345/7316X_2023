@@ -12,18 +12,12 @@ namespace xlib {
         ChassisScales scales {{1, 1}, imev5GreenTPR};
         float trackWidth;
 
-        std::shared_ptr<ADIEncoder> rightEncoder;
-        std::shared_ptr<ADIEncoder> middleEncoder;
-        std::shared_ptr<RotationSensor> leftVel;
-        std::shared_ptr<RotationSensor> rightVel;
-        std::shared_ptr<IMU> imu1;
-        std::shared_ptr<IMU> imu2;
-        std::int8_t distanceSensor;
+        std::shared_ptr<ADIEncoder> tracking;
+        std::shared_ptr<IMU> imu;
 
         IterativePosPIDController::Gains distanceGains;
         IterativePosPIDController::Gains turnGains;
         IterativePosPIDController::Gains angleGains;
-        IterativePosPIDController::Gains distanceSensorGains;
         std::vector<float> purePursuitGains;
 
         float maxVelocity;
@@ -45,12 +39,10 @@ namespace xlib {
 
         ExtendedChassisBuilder& withMaxVelocity(const float absolMaxVel);
 
-        ExtendedChassisBuilder& withSensors(const ADIEncoder& iright, const ADIEncoder& imiddle, 
-                                           const RotationSensor ileftVelocity, const RotationSensor irightVelocity, 
-                                           const IMU& inertial1, const IMU& inertial2,
-                                           const std::int8_t distance);
+        ExtendedChassisBuilder& withSensors(const ADIEncoder& itracking,
+                                           const IMU& inertial);
 
-        ExtendedChassisBuilder& withGains(const IterativePosPIDController::Gains& idistanceGains, const IterativePosPIDController::Gains& iturnGains, const IterativePosPIDController::Gains& iangleGains, const IterativePosPIDController::Gains& idistanceSensorGains, const IterativePosPIDController::Gains& ipurePursuitGains);
+        ExtendedChassisBuilder& withGains(const IterativePosPIDController::Gains& idistanceGains, const IterativePosPIDController::Gains& iturnGains, const IterativePosPIDController::Gains& iangleGains, const IterativePosPIDController::Gains& ipurePursuitGains);
 
         ExtendedChassisBuilder& withVelocityConstants(float maxVel, float maxAccel, float curveConstant, float maxChange);
 

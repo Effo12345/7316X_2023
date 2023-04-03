@@ -43,12 +43,9 @@ private:
     float headingOffset {0.0f};
     Velocity vel;
 
-    ADIEncoder rightEncoder {'Z', 'Z'};
-    ADIEncoder middleEncoder {'Z', 'Z'};
-    IMU imu1 {0};
-    IMU imu2 {0};
+    ADIEncoder tracking {'Z', 'Z'};
+    IMU imu {0};
     RotationSensor leftRotation {0};
-    RotationSensor rightRotation {0};
 
     double rightEncoderDistance;
     double middleEncoderDistance;
@@ -72,15 +69,13 @@ public:
     QPos getRawPos();
     void setPos(QPoint ipos, QAngle iheading);
 
-    QLength getRightTrack();
-
-    Velocity getVel();
+    QLength getTrack();
 
     double getInternalIMU();
 
-    void withSensors(const ADIEncoder& right, const ADIEncoder& middle, const IMU& inertial1, const IMU& inertial2, const RotationSensor& leftVel, const RotationSensor& rightVel);
+    void withSensors(const ADIEncoder& itracking, const IMU& inertial);
 
-    void setScales(const ChassisScales& iscales);
+    void setScales(QLength iscales);
 
     void startLoop();
     void stopLoop();
