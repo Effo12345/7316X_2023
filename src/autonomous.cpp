@@ -3,6 +3,7 @@
 
     //Turns the roller on the left side of the field 
     void WPL() {
+        /*
         chassis->startOdom();
         //Back into the roller
         chassis->getModel()->arcade(-0.5, 0);
@@ -14,10 +15,12 @@
         primary.rollerFlip();
         chassis->getModel()->arcade(0, 0);
         chassis->stopOdom();
+        */
     }
 
     //Turns a roller and shoots three discs into the high goal
     void FullL() {
+        /*
         chassis->startOdom();
         fw.moveVelocity(3100, 0.88);
         //Back into the roller
@@ -60,11 +63,13 @@
         }
 
         chassis->stopOdom();
+        */
     }
 
     //Turns the roller on the right half of the field for half of the autonomous
     //win point
     void WPR() {
+        /*
         chassis->startOdom();
         //Navigate to the roller
         chassis->driveDistance(-15_in, 1_s);
@@ -78,9 +83,11 @@
         //Flip the roller to a scored position
         primary.rollerFlip();
         chassis->stopOdom();
+        */
     }
     
     void FullR() {
+        /*
         chassis->startOdom();
         chassis->setPIDVelocityLimit(0.7);
         //Drive forward and intake a disc. Navigate to face the high goal
@@ -118,9 +125,11 @@
         (chassis->getModel())->stop();
         primary.rollerFlip();
         chassis->stopOdom();
+        */
     }
 
     void FullWP() {
+        /*
         chassis->startOdom();
         fw.moveVelocity(3100, 0.88);
         //Back into the roller
@@ -177,10 +186,12 @@
         //Flip the roller to scored
         primary.rollerFlip();
         chassis->stopOdom();
+        */
     }
 
     //Programming skills: 9 discs in high goal, 4 rollers, expansion
     void Skills() {
+        /*
         //Store the desired flywheel velocity
 	    std::pair<int, float> matchloadVel {2250, 0.91};
 
@@ -329,9 +340,11 @@
 		//Expand
 		expansion.toggle();
 		chassis->stopOdom();
+        */
     }
 
     void SafetySkills() {
+        /*
         chassis->startOdom();
         //Limit the robot to half speed
         chassis->setPIDVelocityLimit(0.5);
@@ -413,4 +426,5 @@
         //Expand
         expansion.toggle();
         chassis->stopOdom();
+        */
     }

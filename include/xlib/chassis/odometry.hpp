@@ -41,19 +41,24 @@ private:
 
     QPos pos {{0, 0}, 0};
     float headingOffset {0.0f};
-    Velocity vel;
 
     ADIEncoder tracking {'Z', 'Z'};
     IMU imu {0};
-    RotationSensor leftRotation {0};
 
-    double rightEncoderDistance;
-    double middleEncoderDistance;
     double wheelRadius;
 
-    double prevRightEncoderPos = 0.0;
-    double prevMiddleEncoderPos = 0.0;
-    double prevHeading = 0.0;
+    //Odometry variables with class scope
+    float distance;
+    float deltaDistance;
+    float previousDistance {0.0f};
+
+    float heading;
+    float deltaHeading;
+    float previousHeading {0.0f};
+
+    float arcRadius;
+    float chordLength;
+    QPoint offset;
 
     double degToRad(double deg);
     double radToDeg(double rad);

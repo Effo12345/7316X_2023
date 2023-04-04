@@ -55,7 +55,46 @@ namespace xlib {
      */
     void Odom::loop() {
         while(true) {
-            //REPLACE WITH ONE-WHEEL ODOM ALGORITHM
+            //Find total distance traveled by the tracking wheel
+            distance = degToIn(tracking.get());
+            //Calculate the distance traveled since the last update
+            deltaDistance = distance - previousDistance;
+            //Set the previous distance to the current distance
+            previousDistance = distance;
+            //Find the change in heading
+            heading = imu.get() + headingOffset;
+            deltaHeading = heading - previousHeading;
+            previousHeading = heading;
+
+            //Uses the length of arc moved and change in heading to find radius of arc
+            arcRadius = (deltaDistance / deltaHeading);
+
+            //Calculates the chord traveled
+            chordLength = 2 * (arcRadius * (deltaHeading / 2));
+
+            //Calculates x and y components of chordLength
+            offset.x = sin(degToRad(heading - (deltaHeading / 2))) * chordLength;
+            offset.y = cos(degToRad(heading - (deltaHeading / 2)))
+                        * chordLength;
+
+
+            if(isnanf(offset.x) || isnanf(offset.y)) {
+                printf("NAN in odom \n");
+            }
+            else {
+                posThreadSafety.take();
+                pos.p += offset;
+                pos.a += deltaHeading;
+                posThreadSafety.give();
+
+                std::string output1 = "X: " + std::to_string(pos.p.x);
+                std::string output2 = "Y: " + std::to_string(pos.p.y);
+                std::string output3 = "A: " + std::to_string(heading);
+                pros::lcd::set_text(1, output1);
+                pros::lcd::set_text(2, output2);
+                pros::lcd::set_text(3, output3);
+            }
+            pros::delay(10);
         }
     }
 
@@ -108,7 +147,7 @@ namespace xlib {
      */
     void Odom::setPos(QPoint ipos, QAngle iheading) {
         pos.p = {ipos.y, ipos.x * -1};
-        headingOffset = prevHeading = pos.a = iheading.convert(radian) * -1;
+        headingOffset = previousHeading = pos.a = iheading.convert(radian) * -1;
     }
 
     /**
