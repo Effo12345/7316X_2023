@@ -2,6 +2,7 @@
 //#include "main.h"
 #include "okapi/api/control/iterative/iterativePosPidController.hpp"
 #include "okapi/api/units/QLength.hpp"
+#include "okapi/impl/device/motor/motorGroup.hpp"
 #include "xlib/chassis/odometry.hpp"
 #include "xlib/chassis/pathgenerator.hpp"
 #include "xlib/chassis/pathfollower.hpp"
@@ -19,10 +20,16 @@ namespace xlib {
 		std::shared_ptr<IterativePosPIDController> movePID;
 		std::shared_ptr<IterativePosPIDController> headingPID;
 
+		std::shared_ptr<MotorGroup> leftVelocityGetter;
+		std::shared_ptr<MotorGroup> rightVelocityGetter;
+
 		pros::Mutex motorThreadSafety;
 
 		QLength relativeTrackingDistance = 0.0 * inch;
 		double PIDvelocityLimit = 1.0f;
+
+
+		Odom::Velocity getVel();
 
 	public:
 		QPath::Settings settings;

@@ -12,8 +12,11 @@ namespace xlib {
         std::shared_ptr<okapi::IterativePosPIDController::Gains> indexerGains;
 
         void indexerPID(okapi::QAngle setpoint);
+
+        okapi::QAngle distanceToIndex {};
+
     public:
-        PrimaryMotor(const std::int8_t iport, const okapi::IterativePosPIDController::Gains& igains);
+        PrimaryMotor(const std::int8_t iport, const okapi::IterativePosPIDController::Gains& igains, const okapi::QAngle indexDistance);
 
         void setNormalizedVelocity(float vel);
         float getNormalizedVelocity();
@@ -22,8 +25,6 @@ namespace xlib {
         void staggeredIndex(int timesToIndex, okapi::QTime delayPerIndex);
         void rollerFlip();
         void skillsRollerFlip();
-
-        void debugPID(okapi::QAngle setpoint);
     };
 
 }

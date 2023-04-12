@@ -42,14 +42,10 @@ namespace xlib {
         stop();
     }
 
-    void PrimaryMotor::debugPID(okapi::QAngle setpoint) {
-        indexerPID(setpoint);
-    }
-
     void PrimaryMotor::staggeredIndex(int timesToIndex, okapi::QTime delayPerIndex) {
         for(int i = 0; i < timesToIndex; i++) {
             tarePosition();
-            indexerPID(-300_deg);
+            indexerPID(distanceToIndex);
             pros::delay(delayPerIndex.convert(okapi::millisecond));
         }
     }
@@ -70,8 +66,9 @@ namespace xlib {
         stop();
     }
 
-    PrimaryMotor::PrimaryMotor(const std::int8_t iport, const okapi::IterativePosPIDController::Gains& igains)
-        : okapi::Motor{iport} //Calls the constructor for okapi::Motor 
+    PrimaryMotor::PrimaryMotor(const std::int8_t iport, const okapi::IterativePosPIDController::Gains& igains, const okapi::QAngle indexDistance)
+        : okapi::Motor{iport}, //Calls the constructor for okapi::Motor 
+          distanceToIndex{indexDistance}
           {
             indexerGains = std::make_shared<okapi::IterativePosPIDController::Gains>(igains);
           }

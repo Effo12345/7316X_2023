@@ -26,7 +26,7 @@ std::shared_ptr<ExtendedChassis> chassis = ExtendedChassisBuilder()
 Flywheel fw(-1, 0.00015f, 0.2f, selector);
 
 //Motor that runs intake, indexer, and roller mechanism
-PrimaryMotor primary(-15, {0.01, 0.0, 0.02});
+PrimaryMotor primary(-15, {0.01, 0.0, 0.02}, -300_deg);
 
 //Pneumatics
 Pneumatics expansion(6, false);

@@ -71,14 +71,6 @@ void autonomous() {
 	//selector.runSelection();
 
 	chassis->startOdom({11.62, -65.34}, 0_deg);
-	chassis->settings.reversed = false;
-	chassis->followNewPath({{
-		{11.62, -65.34},
-        {-15.87, -41.24},
-        {-13.04, 2.13},
-        {38.83, 0.71},
-        {16.72, 57.4}
-	}});
 }
 
 /**
@@ -163,34 +155,3 @@ void opcontrol() {
 		pros::delay(20);
 	}
 }
-
-
-/*
-if l1 (changed pressed) && !flywheel toggle
-	start flywheel;
-	flywheelToggle = true;
-else if l1(changed to released) && flywheel toggle
-	readyToIndex = true;
-
-
-if l1 (changed to pressed) && readyToIndex
-	set negative;
-else if l1 (changed to released) && readyToIndex
-	set intakeToggle;
-
-if r1 (changed to pressed)
-	intakeToggle = !intakeToggle;
-	set intakeToggle;
-
-if r2 (changed to pressed)
-	set positive;
-else if r2 (changed to released)
-	intakeToggle = false;
-	set stop;
-
-if l1 && l2 && r1 && r2 && hasExpanded
-	hasExpanded = true;
-	expansion.toggle;
-
-	
-*/

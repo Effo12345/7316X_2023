@@ -39,6 +39,9 @@ namespace xlib {
         drive = ChassisControllerBuilder().withMotors(ileft, iright).withDimensions(igearset, iscales).build();
         odometer.setScales(iscales.wheelDiameter);
         odometer.withSensors(tracking, inertial);
+
+        leftVelocityGetter = std::make_shared<MotorGroup>(ileft);
+        rightVelocityGetter = std::make_shared<MotorGroup>(iright);
     
         settings = set;
 
@@ -69,6 +72,7 @@ namespace xlib {
 		return drive->getModel();
 	}
 
+
     /**
      * Follows a path generated from a set of waypoints using the pure pursuit
      * path following algorithm
@@ -84,7 +88,9 @@ namespace xlib {
         motorThreadSafety.take();
 		while(true) {
             //TODO: IMPLEMENTATION NEEDS FIXED
-			//Odom::Velocity vel = pathFollower.step(odometer.getPos(), odometer.getVel());
+            Odom::Velocity chassisVel = {leftVelocityGetter->getActualVelocity(), rightVelocityGetter->getActualVelocity()};
+            chassisVel = chassisVel * drive->getGearsetRatioPair().ratio;
+			Odom::Velocity vel = pathFollower.step(odometer.getPos(), chassisVel);
 			//(drive->getModel())->tank(vel.leftVel, vel.rightVel);
 
 			pros::delay(25);
