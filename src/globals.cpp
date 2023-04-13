@@ -8,8 +8,8 @@ Controller master(ControllerId::master);
 
 //Custom chassis object to wrap drivetrain motors and control movement
 std::shared_ptr<ExtendedChassis> chassis = ExtendedChassisBuilder()
-    .withMotors({-12, -13, 14}, {8, 9, -10})
-    .withDimensions({AbstractMotor::gearset::blue, (5.0 / 3.0)}, {{2.7936_in}, quadEncoderTPR}, 14.9_in)
+    .withMotors({-11, -12, 13}, {18, 19, -20})
+    .withDimensions({AbstractMotor::gearset::blue, (5.0 / 3.0)}, {{2.7936_in, 2.96875_in, 6.34375_in, 2.7936_in}, quadEncoderTPR}, 14.9_in)
     .withMaxVelocity(480)
     .withSensors({'A', 'B'}, 17)
     .withGains(
@@ -26,7 +26,7 @@ std::shared_ptr<ExtendedChassis> chassis = ExtendedChassisBuilder()
 Flywheel fw(-1, 0.00015f, 0.2f, selector);
 
 //Motor that runs intake, indexer, and roller mechanism
-PrimaryMotor primary(-15, {0.01, 0.0, 0.02}, -300_deg);
+PrimaryMotor primary(-10, {0.01, 0.0, 0.02}, -300_deg);
 
 //Pneumatics
 Pneumatics expansion(6, false);

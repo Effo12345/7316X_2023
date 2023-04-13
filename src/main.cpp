@@ -4,16 +4,6 @@
 #include "xlib/chassis/extendedchassis.hpp"
 
 //Boolean flags for use in driver control
-/*
-bool fwToggle = false;
-int intakeToggle = false;
-bool rollerToggle = false;
-bool indexerToggle = false;
-bool curvatureToggle = false;
-bool autonSelectorActive = true;
-bool hasExpanded = false;
-bool adjusterState = false;
-*/
 bool fwToggle = false;
 int intakeState = false;
 bool adjusterState = false;
