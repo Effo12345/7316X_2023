@@ -6,12 +6,14 @@ using namespace xlib;
 //Controller
 Controller master(ControllerId::master);
 
+std::uint8_t portExtender = 15;
+
 //Custom chassis object to wrap drivetrain motors and control movement
 std::shared_ptr<ExtendedChassis> chassis = ExtendedChassisBuilder()
-    .withMotors({-11, -12, 13}, {18, 19, -20})
+    .withMotors({-18, -19, 20}, {11, -12, 13})
     .withDimensions({AbstractMotor::gearset::blue, (5.0 / 3.0)}, {{2.7936_in, 2.96875_in, 6.34375_in, 2.7936_in}, quadEncoderTPR}, 14.9_in)
     .withMaxVelocity(480)
-    .withSensors({'A', 'B'}, 17)
+    .withSensors({{portExtender, 'F', 'G'}}, 17)
     .withGains(
         {0.1, 0.005, 0.00165}, // Distance controller gains
         {0.06, 0.0001, 0.002}, // Turn controller gains
@@ -29,8 +31,10 @@ Flywheel fw(-1, 0.00015f, 0.2f, selector);
 PrimaryMotor primary(-10, {0.01, 0.0, 0.02}, -300_deg);
 
 //Pneumatics
-Pneumatics expansion(6, false);
-Pneumatics angleAdjuster(7, false);
+Pneumatics lowExpansion1 {{portExtender, 'B'}};
+Pneumatics lowExpansion2 {{portExtender, 'C'}};
+Pneumatics highExpansion {{portExtender, 'A'}};
+Pneumatics angleAdjuster {{portExtender, 'D'}};
 
 //Custom auton selector object. Takes button names and functions to run
 Selector selector({

@@ -1,5 +1,6 @@
 #include "main.h"
 #include "globals.hpp"
+#include "okapi/impl/device/controllerUtil.hpp"
 #include "pros/llemu.hpp"
 #include "xlib/chassis/extendedchassis.hpp"
 
@@ -131,8 +132,19 @@ void opcontrol() {
 			hasExpanded = true;
 			primary.setNormalizedVelocity(intakeState = false);
 			fw.moveVelocity(fwToggle = false);
-			expansion.toggle();
+			lowExpansion1.toggle();
+			lowExpansion2.toggle();
+			highExpansion.toggle();
 		   }
+
+		if(master[ControllerDigital::down].changedToPressed() && !hasExpanded) {
+			hasExpanded = true;
+			lowExpansion1.toggle();
+			lowExpansion2.toggle();
+		}
+
+		if(master[ControllerDigital::left].changedToPressed())
+			autonomous();
 
 		chassis->getModel()->tank (
 			master.getAnalog(ControllerAnalog::leftY),

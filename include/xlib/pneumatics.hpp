@@ -8,7 +8,10 @@ namespace xlib {
         bool state;
 
         public:
-        Pneumatics(char iPort, bool initState = false);
+        Pneumatics(std::uint8_t iPort, bool initState = false);
+        Pneumatics(std::pair<std::uint8_t, std::uint8_t> iPort, bool initState = false);
+
+        Pneumatics(const Pneumatics& iPiston) = delete;
 
         ~Pneumatics() = default;
 

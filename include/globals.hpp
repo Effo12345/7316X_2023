@@ -16,7 +16,9 @@ extern Controller master;
 extern Flywheel fw;
 extern PrimaryMotor primary;
 
-extern Pneumatics expansion;
+extern Pneumatics lowExpansion1;
+extern Pneumatics lowExpansion2;
+extern Pneumatics highExpansion;
 extern Pneumatics angleAdjuster;
 
 extern ADIEncoder rightEncoder;

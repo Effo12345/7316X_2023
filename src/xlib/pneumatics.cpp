@@ -8,9 +8,9 @@
 
 namespace xlib {
     //Constructor to initialize port and default state
-    Pneumatics::Pneumatics(char iPort, bool initState):piston(iPort), state(initState){
-        piston.set_value(state);
-    }
+    Pneumatics::Pneumatics(std::uint8_t iPort, bool initState) :piston(iPort, initState), state(initState) {}
+    Pneumatics::Pneumatics(std::pair<std::uint8_t, std::uint8_t> iPort, bool initState) :piston(iPort, initState), state(initState) {}
+
 
     //Set state to its opposite
     void Pneumatics::toggle(){
