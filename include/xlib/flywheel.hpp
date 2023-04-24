@@ -42,6 +42,8 @@ namespace xlib {
         void moveVelocity(std::pair<int, float> vel);
         void toggleReverse();
         void stop();
+
+        std::function<void(int, float)> getAnonymousVelocitySetter();
     };
 }
 

@@ -1,430 +1,312 @@
 #include "autonomous.hpp"
 #include "globals.hpp"
 
-    //Turns the roller on the left side of the field 
-    void WPL() {
-        /*
-        chassis->startOdom();
-        //Back into the roller
-        chassis->getModel()->arcade(-0.5, 0);
-        pros::delay(500);
-        chassis->getModel()->arcade(0, 0);
+void left6Disc() {
+    chassis->startOdom({-36.875, -58.375}, 0_deg);
 
-        //Flip the roller to scored
-        chassis->getModel()->arcade(-0.1, 0);
-        primary.rollerFlip();
-        chassis->getModel()->arcade(0, 0);
-        chassis->stopOdom();
-        */
-    }
+	(chassis->getModel())->arcade(-0.5, 0);
+	pros::delay(200);
+	(chassis->getModel())->arcade(0, 0);
+	primary.rollerFlip();
+	(chassis->getModel())->arcade(0.25, 0);
+	pros::delay(150);
+	(chassis->getModel())->stop();
+	primary.setNormalizedVelocity(1);
+	
+	chassis->settings.kV = 3.8;
+	chassis->followNewPath({{
+		{-38.27, -67.32},
+        {-43.94, -52.3}
+	}});
+	fw.moveVelocity({2700, 0.9});
 
-    //Turns a roller and shoots three discs into the high goal
-    void FullL() {
-        /*
-        chassis->startOdom();
-        fw.moveVelocity(3100, 0.88);
-        //Back into the roller
-        (chassis->getModel())->arcade(-0.5, 0);
-        pros::delay(250);
-        (chassis->getModel())->arcade(0, 0);
+	//chassis->settings.kV = 2.5;
+	chassis->settings.reversed = true;
+	chassis->followNewPath({{
+		{-44.79, -51.45},
+        {-29.48, -45.21}
+	}});
 
-        //Flip the roller to scored
-        (chassis->getModel())->arcade(-0.1, 0);
-        primary.rollerFlip();
-        (chassis->getModel())->stop();
+	chassis->turnToAngle(-18_deg, 1.5_s);
+	pros::delay(1500);
+	primary.staggeredIndex(3, 500_ms);
+	pros::delay(100);
+	fw.moveVelocity(2500, 0.8);
 
-        //Drive to the 3 stack of discs
-        chassis->driveDistance(6_in, 1_s);
-        pros::delay(100);
-        chassis->turnToAngle(56_deg, 1_s);
-        pros::delay(100);
-        
-        primary.setNormalizedVelocity(1.0);
-        chassis->driveDistance(22_in, 5_s);
-        //Oscilate to intake the stack more effectively
-        chassis->setPIDVelocityLimit(0.9);
-        //chassis->discGrabOscilations(48_in, 1_s);
-        pros::delay(200);
-        //Navigate to face the high goal
-        chassis->turnToAngle(-29_deg, 1_s);
-        pros::delay(1000);
+	chassis->getModel()->arcade(-0.5, 0);
+	pros::delay(150);
+	chassis->getModel()->stop();
 
-        //Shoot a volley
-        primary.setNormalizedVelocity(-1.0);
-        pros::delay(190);
-        primary.setNormalizedVelocity(0);
-        pros::delay(500);
+	chassis->turnToAngle(45_deg, 750_ms);
 
-        for(int i = 0; i < 3; i++) {
-            primary.setNormalizedVelocity(-1);
-            pros::delay(500);
-            primary.setNormalizedVelocity(0);
-            pros::delay(500);
-        }
+	chassis->settings.reversed = false;
+	chassis->settings.useRateLimiter = false;
+	chassis->settings.maxAcceleration = 400;
+	chassis->followNewPath({{
+		{-29.48, -45.21},
+        {-21.54, -43.23},
+        {-15.59, -38.98}
+	}});
 
-        chassis->stopOdom();
-        */
-    }
+	primary.setNormalizedVelocity(1);
 
-    //Turns the roller on the right half of the field for half of the autonomous
-    //win point
-    void WPR() {
-        /*
-        chassis->startOdom();
-        //Navigate to the roller
-        chassis->driveDistance(-15_in, 1_s);
-        pros::delay(100);
-        chassis->turnToAngle(90_deg, 1000_ms);
-        pros::delay(100);
+	chassis->settings.useRateLimiter = true;
+	chassis->settings.maxAcceleration = 200;
+	chassis->settings.maxVelocity = 40;
+	chassis->followNewPath({{
+		{-16.44, -42.66},
+        {-11.06, -33.59},
+        {-6.52, -19.7}
+	}});
 
-        chassis->driveDistance(-11_in, 500_ms);
-        pros::delay(100);
+	chassis->turnToAngle(-44_deg, 1_s);
+	primary.staggeredIndex(3, 500_ms);
 
-        //Flip the roller to a scored position
-        primary.rollerFlip();
-        chassis->stopOdom();
-        */
-    }
-    
-    void FullR() {
-        /*
-        chassis->startOdom();
-        chassis->setPIDVelocityLimit(0.7);
-        //Drive forward and intake a disc. Navigate to face the high goal
-        fw.moveVelocity(2500, 0.85);
-        primary.setNormalizedVelocity(1.0);
-        chassis->driveDistance(24_in, 2_s);
-        pros::delay(100);
-        chassis->turnToAngle(35_deg, 1_s);
-        pros::delay(2000);
+    fw.moveVelocity(0);
+    chassis->stopOdom();
+}
 
-        //Shoot a volley
-        primary.setNormalizedVelocity(-1.0);
-        primary.setNormalizedVelocity(0.0);
-        pros::delay(500);
+void left3Disc() {
+    chassis->startOdom({-36.875, -58.375}, 0_deg);
 
-        for(int i = 0; i < 3; i++) {
-            primary.setNormalizedVelocity(-1.0);
-            pros::delay(500);
-            primary.setNormalizedVelocity(0.0);
-            pros::delay(500);
-        }
+	(chassis->getModel())->arcade(-0.5, 0);
+	pros::delay(200);
+	(chassis->getModel())->arcade(0, 0);
+	primary.rollerFlip();
+	(chassis->getModel())->arcade(0.25, 0);
+	pros::delay(150);
+	(chassis->getModel())->stop();
+	primary.setNormalizedVelocity(1);
+	
+	chassis->settings.kV = 3.8;
+	chassis->followNewPath({{
+		{-38.27, -67.32},
+        {-43.94, -52.3}
+	}});
+	fw.moveVelocity({2600, 0.7});
 
-        //Navigate to the roller
-        fw.moveVelocity(0);
-        chassis->turnToAngle(-45_deg, 1_s);
-        pros::delay(100);
-        chassis->driveDistance(-35_in, 2_s);
-        pros::delay(100);
-        chassis->turnToAngle(0_deg, 1_s);
-        pros::delay(100);
+	//chassis->settings.kV = 2.5;
+	chassis->settings.reversed = true;
+	chassis->followNewPath({{
+		{-44.79, -51.45},
+        {-29.48, -45.21}
+	}});
 
-        //Flip the roller to scored
-        (chassis->getModel())->arcade(-0.4, 0.0);
-        pros::delay(500);
-        (chassis->getModel())->stop();
-        primary.rollerFlip();
-        chassis->stopOdom();
-        */
-    }
+	chassis->turnToAngle(-18_deg, 1.5_s);
+	(chassis->getModel())->arcade(0.25, 0);
+	pros::delay(600);
+	chassis->getModel()->stop();
+	pros::delay(2400);
+	primary.staggeredIndex(3, 1000_ms, {2600, 100});
+	fw.moveVelocity(0);
 
-    void FullWP() {
-        /*
-        chassis->startOdom();
-        fw.moveVelocity(3100, 0.88);
-        //Back into the roller
-        (chassis->getModel())->arcade(-0.5, 0);
-        pros::delay(250);
-        (chassis->getModel())->arcade(0, 0);
+    chassis->stopOdom();
+}
 
-        //Flip the roller to scored
-        (chassis->getModel())->arcade(-0.1, 0);
-        primary.rollerFlip();
-        (chassis->getModel())->stop();
+void leftRoller() {
+    (chassis->getModel())->arcade(-0.5, 0);
+	pros::delay(200);
+	(chassis->getModel())->arcade(0, 0);
+	primary.rollerFlip2();
+}
 
-        //Navigate to the stack of discs
-        chassis->driveDistance(6_in, 1_s);
-        pros::delay(100);
-        chassis->turnToAngle(56_deg, 1_s);
-        pros::delay(100);
-        
-        primary.setNormalizedVelocity(1.0);
-        chassis->driveDistance(22_in, 5_s);
-        chassis->setPIDVelocityLimit(0.9);
-        //Oscilte the intake to grab discs more efficiently
-        //chassis->discGrabOscilations(48_in, 1_s);
-        pros::delay(200);
-        //Navigate to face the high goal and shoot a volley
-        chassis->turnToAngle(-29_deg, 1_s);
-        pros::delay(100);
-        primary.setNormalizedVelocity(-0.19);
-        chassis->driveDistance(8_in, 500_ms);
-        pros::delay(500);
-        chassis->driveDistance(6_in, 1_s);
+void right6Disc() {
+    chassis->startOdom({55.9375, 6.25}, -90_deg);
+	fw.moveVelocity({2600, 0.9});
 
-        //Grab the line of 3 discs
-        fw.moveVelocity(3450, 0.94);
-        chassis->turnToAngle(50_deg, 1_s);
-        pros::delay(100);
-        primary.setNormalizedVelocity(1.0);
-        chassis->setPIDVelocityLimit(0.7);
-        chassis->driveDistance(70_in, 5_s);
-        pros::delay(100);
-        chassis->setPIDVelocityLimit(0.9);
-        chassis->turnToAngle(-70_deg, 1_s);
-        //Shoot a second volley
-        primary.setNormalizedVelocity(-0.19);
-        pros::delay(1700);
+	primary.setNormalizedVelocity(1);
+	chassis->followNewPath({{
+		{54.71, 7.23},
+        {39.12, 11.48},
+        {29.2, 14.6}
+	}});
 
-        //Navigate to the second roller
-        chassis->setPIDVelocityLimit(1.0);
-        chassis->turnToAngle(-155_deg, 1_s);
-        fw.moveVelocity(0);
-        chassis->driveDistance(-14_in, 1_s);
-        chassis->turnToAngle(-90_deg, 1_s);
-        chassis->driveDistance(-11_in, 1.5_s);
-        //Flip the roller to scored
-        primary.rollerFlip();
-        chassis->stopOdom();
-        */
-    }
+	pros::delay(1250);
+	primary.staggeredIndex(3, 300_ms);
 
-    //Programming skills: 9 discs in high goal, 4 rollers, expansion
-    void Skills() {
-        /*
-        //Store the desired flywheel velocity
-	    std::pair<int, float> matchloadVel {2250, 0.91};
+	primary.setNormalizedVelocity(1);
+	chassis->turnToAngle(-30_deg, 500_ms);
+	pros::delay(100);
 
-        chassis->startOdom({0.1875, -56.5}, 180_deg);
-		chassis->setPIDVelocityLimit(0.7);
+	(chassis->getModel())->arcade(0.4, 0.0);
+	pros::delay(200);
+	(chassis->getModel())->stop();
 
-		//Intake the first volley of matchloads
-        fw.toggleReverse();
-        chassis->driveDistance(7_in, 500_ms);
-        (chassis->getModel())->arcade(0.3, 0.0);
-        pros::delay(4000);
-        (chassis->getModel())->stop();
-        primary.setNormalizedVelocity(1.0);
-        chassis->driveDistance(1_in, 500_ms);
-		fw.toggleReverse();
-        pros::delay(100);
+	(chassis->getModel())->arcade(-0.4, 0.0);
+	pros::delay(250);
+	(chassis->getModel())->stop();
+	//pros::delay(100);
 
-		//Turn to face the high goal and shoot a volley
-        fw.moveVelocity(matchloadVel);
-        chassis->turnToPoint({53.01, -55.57}, 1_s);
-        pros::delay(100);
-        chassis->driveDistance(8_in, 1_s);
-        pros::delay(3000);
-        primary.setNormalizedVelocity(-1.0);
-        pros::delay(1000);
+	fw.moveVelocity({2550, 0.877});
+	//chassis->turnToPoint({36, 11.76}, 1_s);
+	chassis->turnToAngle(-138_deg, 500_ms);
+	//pros::delay(100);
+	
+	//chassis->settings.reversed = false;
+	chassis->followNewPath({{
+		{36, 11.76},
+        {23.24, -1.56},
+        {9.35, -8.65}
+	}});
 
-		//Navigate back to the match loader and intake the second volley
-		fw.moveVelocity(0);
-        fw.toggleReverse();
-        primary.setNormalizedVelocity(0.0);
-        chassis->driveDistance(1_in, 1_s);
-        pros::delay(100);
-        chassis->turnToAngle(180_deg, 1_s);
-        pros::delay(100);
-        chassis->driveDistance(7_in, 500_ms);
-        (chassis->getModel())->arcade(0.3, 0.0);
-        pros::delay(4000);
-        (chassis->getModel())->stop();
-        primary.setNormalizedVelocity(1.0);
+	pros::delay(100);
+	chassis->turnToAngle(-43_deg, 1000_ms);
+	//pros::delay(100);
 
-		//Turn to face the high goal and shoot second volley
-        chassis->driveDistance(-1_in, 500_ms);
-		fw.toggleReverse();
-        pros::delay(100);
-        fw.moveVelocity(matchloadVel);
-        chassis->turnToPoint({53.01, -55.57}, 1_s);
-        pros::delay(100);
-        chassis->driveDistance(8_in, 1_s);
-        pros::delay(3500);
-        primary.setNormalizedVelocity(-1.0);
-        pros::delay(1125);
+	primary.staggeredIndex(3, 300_ms);
 
-		//Navigate back to the match loader and intake volley 3
-		fw.moveVelocity(0);
-        fw.toggleReverse();
-        primary.setNormalizedVelocity(0.0);
-        chassis->driveDistance(0.5_in, 1_s);
-        pros::delay(100);
-        chassis->turnToAngle(180_deg, 1_s);
-        pros::delay(100);
-        chassis->driveDistance(7_in, 500_ms);
-        (chassis->getModel())->arcade(0.3, 0.0);
-        pros::delay(4000);
-        (chassis->getModel())->stop();
-        primary.setNormalizedVelocity(1.0);
+	chassis->turnToAngle(-135_deg, 500_ms);
+	fw.moveVelocity(0);
+	//pros::delay(100);
+	chassis->settings.reversed = true;
+	chassis->settings.maxAcceleration = 300;
+	chassis->settings.maxRateChange = 300;
+	chassis->settings.lookaheadDistance = 20;
+	chassis->followNewPath({{
+		{12.76, -11.76},
+        {51.87, 37.28}
+	}});
 
-		//Turn to face the high goal and shoot the third volley
-        chassis->driveDistance(2_in, 500_ms);
-		fw.toggleReverse();
-        pros::delay(100);
-        fw.moveVelocity(matchloadVel);
-        chassis->turnToPoint({53.01, -55.57}, 1_s);
-        pros::delay(100);
-        chassis->driveDistance(8_in, 1_s);
-        pros::delay(2000);
-        primary.setNormalizedVelocity(-1.0);
-        pros::delay(1000);
-        fw.moveVelocity(0);
+	chassis->turnToAngle(-90_deg, 400_ms);
+	(chassis->getModel())->arcade(-0.7, 0);
+	pros::delay(150);
+	//(chassis->getModel())->arcade(-0.2, 0);
+	chassis->getModel()->stop();
+	primary.rollerFlip2();
+	(chassis->getModel())->stop();
 
-		//Navigate to the first roller
-        chassis->turnToAngle(95_deg, 1_s);
-        pros::delay(100);
-        chassis->driveDistance(-43_in, 3_s);
-        pros::delay(100);
-        chassis->turnToAngle(0_deg, 2_s);
-        primary.setNormalizedVelocity(0.0);
-        pros::delay(100);
-        (chassis->getModel())->arcade(-0.5, 0.0);
-        pros::delay(500);
-        (chassis->getModel())->arcade(-0.1, 0.0);
-		//Flip roller to scored
-        primary.skillsRollerFlip();
-        (chassis->getModel())->stop();
-        pros::delay(100);
+    chassis->stopOdom();
+}
 
-		//Navigate to the second roller, knocking discs out of the way
-        chassis->driveDistance(18_in, 3_s);
-        pros::delay(100);
-        chassis->turnToAngle(90_deg, 1_s);
-        pros::delay(100);
-        (chassis->getModel())->arcade(-0.5, 0.0);
-        pros::delay(1100);
-        (chassis->getModel())->arcade(-0.15, 0.0);
-		//Flip the roller to scored
-        primary.skillsRollerFlip();
-        (chassis->getModel())->stop();
+void right3Disc() {
+    chassis->startOdom({55.9375, 6.25}, -90_deg);
+	fw.moveVelocity({2400, 0.7});
 
-		//Drive across the field to score the third roller
-		chassis->driveDistance(0_in, 1_s);
-		pros::delay(100);
-		chassis->turnToAngle(43_deg, 1_s);
-		pros::delay(100);
-		chassis->driveDistance(116_in, 7_s);
-		pros::delay(100);
-		chassis->driveDistance(105_in, 1_s);
-		chassis->turnToAngle(180_deg, 1_s);
-		pros::delay(100);
+	primary.setNormalizedVelocity(1);
+	chassis->followNewPath({{
+		{54.71, 7.23},
+        {39.12, 11.48},
+        {29.2, 14.6}
+	}});
 
-		//Back into the roller and flip it to scored
-		chassis->driveDistance(-22_in, 1.5_s);
-		(chassis->getModel())->arcade(-0.15, 0.0);
-		pros::delay(100);
-		primary.skillsRollerFlip();
-		(chassis->getModel())->stop();
+	pros::delay(3000);
+	primary.staggeredIndex(3, 1000_ms);
+	fw.moveVelocity(0);
+	
+	chassis->turnToAngle(-135_deg, 1_s);
+	pros::delay(100);
 
-		//Navigate to the fourth roller
-		chassis->driveDistance(18_in, 2_s);
-		pros::delay(100);
-		chassis->driveDistance(12_in, 2_s);
-		pros::delay(100);
-		chassis->turnToAngle(-90_deg, 2_s);
-		pros::delay(100);
-		(chassis->getModel())->arcade(-0.5, 0.0);
-        pros::delay(1250);
-        (chassis->getModel())->arcade(-0.15, 0.0);
-		//Flip it to scored
-        primary.skillsRollerFlip();
-        (chassis->getModel())->stop();
-		pros::delay(200);
+	chassis->settings.reversed = true;
+	chassis->followNewPath({{
+		{29.2, 14.6},
+        {56.69, 35.01}
+	}});
+	pros::delay(100);
 
-		//Navigate to the ideal expansion location
-		chassis->driveDistance(21_in, 750_ms);
-		chassis->turnToAngle(225_deg, 1_s);
-		chassis->driveDistance(-19_in, 500_ms);
+	chassis->turnToAngle(-90_deg, 1_s);
+	(chassis->getModel())->arcade(-0.7, 0);
+	pros::delay(150);
+	chassis->getModel()->stop();
+	primary.rollerFlip2();
+	(chassis->getModel())->stop();
 
-		//Expand
-		expansion.toggle();
-		chassis->stopOdom();
-        */
-    }
+    chassis->stopOdom();
+}
 
-    void SafetySkills() {
-        /*
-        chassis->startOdom();
-        //Limit the robot to half speed
-        chassis->setPIDVelocityLimit(0.5);
-        (chassis->getModel())->arcade(-0.2, 0.0);
-        pros::delay(1000);
-        //Flip the first roller to scored
-        primary.skillsRollerFlip();
-        pros::delay(100);
+void rightRoller() {
+    chassis->startOdom({55.9375, 6.25}, -90_deg);
+	chassis->turnToAngle(-180_deg, 1_s);
+	pros::delay(100);
 
-        //Navigate to the second roller
-        chassis->driveDistance(5_in, 2_s);
-        pros::delay(200);
-        primary.setNormalizedVelocity(1.0);
-        chassis->turnToAngle(-45_deg, 2_s);
-        pros::delay(200);
-        chassis->driveDistance(27_in, 5_s);
-        pros::delay(200);
-        chassis->turnToAngle(90_deg, 2_s);
-        primary.setNormalizedVelocity(0.0);
-        pros::delay(200);
+	chassis->settings.reversed = true;
+	chassis->followNewPath({{
+		{55.94, 6.25},
+        {54.99, 35.57}
+	}});
+	pros::delay(100);
 
-        //Flip the roller to scored
-        (chassis->getModel())->arcade(-0.2, 0.0);
-        pros::delay(1500);
-        primary.skillsRollerFlip();
-        (chassis->getModel())->stop();
-        pros::delay(100);
+	chassis->turnToAngle(-90_deg, 1_s);
+	pros::delay(100);
 
-        //Navigate through the low goal
-        chassis->driveDistance(-1_in, 2_s);
-        pros::delay(200);
-        chassis->turnToAngle(-1_deg, 3_s);
-        pros::delay(200);
-        chassis->driveDistance(90_in, 10_s);
-        pros::delay(500);
-        chassis->turnToAngle(89_deg, 2_s);
-        pros::delay(200);
+	chassis->getModel()->arcade(-0.5, 0);
+	pros::delay(200);
+	chassis->getModel()->stop();
+	primary.rollerFlip();
+	(chassis->getModel())->stop();
 
-        //Drive to the third roller
-        chassis->driveDistance(44_in, 10_s);
-        pros::delay(500);
-        chassis->turnToAngle(94_deg, 2_s);
-        pros::delay(200);
-        chassis->driveDistance(50_in, 8_s);
-        pros::delay(500);
-        chassis->turnToAngle(178_deg, 2_s);
-        pros::delay(200);
-        (chassis->getModel())->arcade(-0.2, 0.0);
-        pros::delay(1500);
-        //Flip the third roller to scored
-        primary.skillsRollerFlip();
-        (chassis->getModel())->stop();
-        pros::delay(100);
+    chassis->stopOdom();
+}
 
-        //Navigate to the fourth roller
-        chassis->driveDistance(0_in, 2_s);
-        pros::delay(200);
-        primary.setNormalizedVelocity(1.0);
-        chassis->turnToAngle(135_deg, 2_s);
-        pros::delay(200);
-        chassis->driveDistance(27_in, 5_s);
-        pros::delay(200);
-        chassis->turnToAngle(270_deg, 2_s);
-        primary.setNormalizedVelocity(0);
-        pros::delay(200);
+void fullWP() {
+    chassis->startOdom({-36.875, -58.375}, 0_deg);
+	fw.moveVelocity(2600, 0.82);
 
-        (chassis->getModel())->arcade(-0.2, 0.0);
-        pros::delay(1500);
-        //Flip the fourth roller to scored
-        primary.skillsRollerFlip();
-        (chassis->getModel())->stop();
-        pros::delay(100);
+	(chassis->getModel())->arcade(-0.5, 0);
+	pros::delay(100);
+	(chassis->getModel())->arcade(0, 0);
+	primary.rollerFlip2();
+	chassis->getModel()->stop();
 
-        //Navigate to ideal expansion location
-        chassis->driveDistance(15_in, 3_s);
-        chassis->turnToAngle(225_deg, 1_s);
-        chassis->driveDistance(-17_in, 3_s);
+	chassis->settings.maxAcceleration = 300;
+	chassis->settings.lookaheadDistance = 15;
+	//chassis->settings.useRateLimiter = false;
+	chassis->settings.kV = 3.5;
+	chassis->followNewPath({{
+		{-41.67, -65.91},
+        {-33.73, -46.91},
+        {-18.71, -41.53}
+	}});
 
-        //Expand
-        expansion.toggle();
-        chassis->stopOdom();
-        */
-    }
+	primary.setNormalizedVelocity(1);
+
+	chassis->settings.maxAcceleration = 200;
+	chassis->settings.maxVelocity = 50;
+	chassis->settings.k = 5.0;
+	chassis->settings.lookaheadDistance = 10;
+	chassis->followNewPath({{
+		{-17.29, -36.71},
+        {4.25, -49.46},
+        {9.92, -38.41},
+        {-4.25, -18.57}
+	}});
+
+	chassis->turnToAngle(-45_deg, 500_ms);
+	primary.staggeredIndex(3, 300_ms);
+
+	fw.moveVelocity(2800, 0.87);
+	chassis->turnToAngle(70_deg, 400_ms);
+	primary.setNormalizedVelocity(1);
+
+	chassis->settings.k = 4.0;
+	chassis->settings.maxVelocity = 200;
+	chassis->settings.maxAcceleration = 150;
+	chassis->settings.lookaheadDistance = 15;
+	chassis->followNewPath({{
+		{-4.25, -18.57},
+        {8.79, -6.09},
+        {31.75, 6.94},
+        {33.45, 16.87}
+	}});
+
+	chassis->turnToAngle(-75_deg, 750_ms);
+	primary.staggeredIndex(3, 300_ms);
+	fw.moveVelocity(0);
+
+	chassis->turnToAngle(-135_deg, 200_ms);
+	chassis->settings.reversed = true;
+	chassis->settings.k = 7.0;
+	chassis->settings.lookaheadDistance = 10;
+	chassis->settings.maxAcceleration = 250;
+	chassis->followNewPath({{
+		{33.45, 16.87},
+        {43.65, 27.64},
+        {47.91, 32.74}
+	}});
+	chassis->turnToAngle(-90_deg, 400_ms);
+	chassis->getModel()->arcade(-0.8, 0);
+	pros::delay(200);
+	chassis->getModel()->stop();
+	primary.rollerFlip2();
+
+    chassis->stopOdom();
+}

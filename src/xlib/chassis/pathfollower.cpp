@@ -160,7 +160,7 @@ namespace xlib {
 
         //If reverse pathing is desired, make the robot appear reversed so curvature computes correctly
         if(settings->reversed)
-            pos.a += okapi::pi;
+            pos.a += 180;
 
         //Find closest point on the path
         int closestPoint = findClosestPointIndex(path->points, pos.p, lastClosestPointIndex);
@@ -177,7 +177,7 @@ namespace xlib {
         }
 
         //Find the curvature of the movement arc
-        float curvature = findArcCurvature(pos.p, pos.a, lookaheadPoint, settings->lookaheadDistance);
+        float curvature = findArcCurvature(pos.p, (pos.a * degree).convert(radian), lookaheadPoint, settings->lookaheadDistance);
 
         float targetVelocity;
         //Calculate the target wheel speeds
@@ -258,7 +258,7 @@ namespace xlib {
             error = 0.0;
             limit.reset();
 
-            //grapher.initGraph({0, 300}, 250);
+            //grapher.initGraph({0, 500}, 300);
         }
 
 }

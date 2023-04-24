@@ -1,4 +1,5 @@
 #include "xlib/chassis/odometry.hpp"
+#include "okapi/api/units/QAngle.hpp"
 #include "okapi/api/units/QLength.hpp"
 #include "okapi/api/util/mathUtil.hpp"
 
@@ -74,10 +75,9 @@ namespace xlib {
 
             //Calculates x and y components of chordLength
             offset.x = sin(degToRad(heading - (deltaHeading / 2))) * chordLength;
-            offset.y = cos(degToRad(heading - (deltaHeading / 2)))
-                        * chordLength;
+            offset.y = cos(degToRad(heading - (deltaHeading / 2))) * chordLength;
 
-
+        
             if(isnanf(offset.x) || isnanf(offset.y)) {
                 printf("NAN in odom \n");
             }
@@ -94,6 +94,7 @@ namespace xlib {
                 pros::lcd::set_text(2, output2);
                 pros::lcd::set_text(3, output3);
             }
+
             pros::delay(10);
         }
     }
@@ -146,8 +147,9 @@ namespace xlib {
      * @param iheading Robot's current heading (converted to radians)
      */
     void Odom::setPos(QPoint ipos, QAngle iheading) {
-        pos.p = {ipos.y, ipos.x * -1};
-        headingOffset = previousHeading = pos.a = iheading.convert(radian) * -1;
+        //pos.p = {ipos.y, ipos.x * -1};
+        pos.p = ipos;
+        headingOffset = previousHeading = pos.a = iheading.convert(degree);
     }
 
     /**

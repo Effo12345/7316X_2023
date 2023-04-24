@@ -102,6 +102,13 @@ namespace xlib {
         doBackSpin = !doBackSpin;
     }
 
+    std::function<void(int, float)> Flywheel::getAnonymousVelocitySetter() {
+        std::function<void(int, float)> f = [=](int vel, float predictedDrive) {
+            this->moveVelocity(vel, predictedDrive);
+        };
+        return f;
+    }
+
     Flywheel::Flywheel(std::int8_t iport, float igain, float ifilterAlpha, Selector& sel)
         : okapi::Motor{iport}, //Calls the constructor for okapi::Motor 
           gain{igain}, selector{sel} {

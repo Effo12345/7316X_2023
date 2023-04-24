@@ -42,7 +42,7 @@ private:
     QPos pos {{0, 0}, 0};
     float headingOffset {0.0f};
 
-    ADIEncoder tracking {'Z', 'Z'};
+    ADIEncoder tracking {{100, 'Z', 'Z'}};
     IMU imu {0};
 
     double wheelRadius;

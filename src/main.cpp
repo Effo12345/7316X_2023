@@ -24,8 +24,6 @@ std::pair<int, float> flywheelVelocitiesL1[2] {flywheelVel, angledFlywheelVel};
  */
 
 void initialize() {
-	selector.setActive(false);
-	pros::lcd::initialize();
 }
 
 /**
@@ -59,9 +57,7 @@ void competition_initialize() {}
  */
 void autonomous() {	
 	//Run the auton the user selected based on the output of the Selector class
-	//selector.runSelection();
-
-	chassis->startOdom({11.62, -65.34}, 0_deg);
+	selector.runSelection();
 }
 
 /**
@@ -78,6 +74,8 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	primary.stop();
+
 	while(true) {
 		if(master[ControllerDigital::L1].changedToPressed() && !fwToggle) {
 			fw.moveVelocity(flywheelVelocitiesL1[adjusterState]);

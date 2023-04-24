@@ -1,10 +1,11 @@
 #pragma once
-//#include "globals.hpp"
 
-    extern void WPL();
-    extern void FullL();
-    extern void WPR();
-    extern void FullR();
-    extern void FullWP();
-    extern void Skills();
-    extern void SafetySkills();
+extern void left6Disc();
+extern void left3Disc();
+extern void leftRoller();
+
+extern void right6Disc();
+extern void right3Disc();
+extern void rightRoller();
+
+extern void fullWP();

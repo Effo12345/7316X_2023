@@ -1,6 +1,7 @@
 #include "xlib/chassis/extendedchassis.hpp"
 #include "odometry.hpp"
 #include "okapi/api/control/iterative/iterativePosPidController.hpp"
+#include "okapi/api/filter/medianFilter.hpp"
 #include "okapi/api/units/QAngle.hpp"
 #include "okapi/api/units/QLength.hpp"
 #include "okapi/impl/device/distanceSensor.hpp"
@@ -82,19 +83,26 @@ namespace xlib {
     void ExtendedChassis::followNewPath(QPath path) {
 		pathGenerator.processWaypoints(path, settings);
 		pathFollower.setNewPath(&path, &settings, odometer.getPos());
+
+        MedianFilter<5> leftFilter;
+        MedianFilter<5> rightFilter;
         
         //Take a mutex to ensure only one function can control the drivetrain
         //motors at a time
         motorThreadSafety.take();
-		while(true) {
+		do {
             //TODO: IMPLEMENTATION NEEDS FIXED
             Odom::Velocity chassisVel = {leftVelocityGetter->getActualVelocity(), rightVelocityGetter->getActualVelocity()};
             chassisVel = chassisVel * drive->getGearsetRatioPair().ratio;
-			Odom::Velocity vel = pathFollower.step(odometer.getPos(), chassisVel);
-			//(drive->getModel())->tank(vel.leftVel, vel.rightVel);
+
+            chassisVel.leftVel = leftFilter.filter(chassisVel.leftVel);
+            chassisVel.rightVel = rightFilter.filter(chassisVel.rightVel);
+
+			Odom::Velocity vel = pathFollower.step(odometer.getRawPos(), chassisVel);
+			(drive->getModel())->tank(vel.leftVel, vel.rightVel);
 
 			pros::delay(25);
-		}
+		} while(!pathFollower.isSettled());
         motorThreadSafety.give();
 	}
 
@@ -145,16 +153,16 @@ namespace xlib {
     void ExtendedChassis::turnToAngle(QAngle targetAngle, QTime time) {
         turnPID->reset();
         turnPID->setTarget(0);
-        turnPID->setIntegratorReset(true);
-        turnPID->setIntegralLimits(0.4 / 0.015, -0.4 / 0.015);
-        turnPID->setErrorSumLimits(15, 0);
+        //turnPID->setIntegratorReset(true);
+        //turnPID->setIntegralLimits(0.4 / 0.015, -0.4 / 0.015);
+        //turnPID->setErrorSumLimits(15, 0);
 
         auto timer = TimeUtilFactory().createDefault().getTimer();
         timer->placeMark();
         motorThreadSafety.take();
 
         do {
-            (drive->getModel())->arcade(0, std::clamp(turnPID->step(-rescale180(targetAngle.convert(degree)- (odometer.getPos().a * radian).convert(degree))), -PIDvelocityLimit, PIDvelocityLimit));
+            (drive->getModel())->arcade(0, std::clamp(turnPID->step(-rescale180(targetAngle.convert(degree)- odometer.getRawPos().a)), -PIDvelocityLimit, PIDvelocityLimit));
             pros::delay(10);
         }while(!turnPID->isSettled() && timer->getDtFromMark() < time);
 
