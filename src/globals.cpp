@@ -1,6 +1,4 @@
 #include "globals.hpp"
-#include "autonomous.hpp"
-#include "xlib/chassis/extendedchassisbuilder.hpp"
 using namespace xlib;
 
 //Controller
@@ -28,7 +26,7 @@ std::shared_ptr<ExtendedChassis> chassis = ExtendedChassisBuilder()
 Flywheel fw(-1, 0.0003f, 0.4f, selector);
 
 //Motor that runs intake, indexer, and roller mechanism
-PrimaryMotor primary(-10, {0.017, 0.0, 0.01}, -300_deg, fw.getAnonymousVelocitySetter());
+PrimaryMotor primary(-10, {0.019, 0.0, 0.01}, -300_deg, fw.getAnonymousVelocitySetter());
 
 //Pneumatics
 Pneumatics lowExpansion1 {{portExtender, 'B'}};

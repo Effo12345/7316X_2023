@@ -1,7 +1,5 @@
 #include "primarymotor.hpp"
-#include "okapi/api/units/QAngle.hpp"
-#include "okapi/api/units/QTime.hpp"
-#include "okapi/impl/util/timer.hpp"
+#include "okapi/api/device/motor/abstractMotor.hpp"
 
 namespace xlib {
     void PrimaryMotor::setNormalizedVelocity(float vel) {
@@ -16,6 +14,14 @@ namespace xlib {
         setNormalizedVelocity(0.0);
     }
 
+    void PrimaryMotor::lock() {
+        setBrakeMode(AbstractMotor::brakeMode::brake);
+    }
+
+    void PrimaryMotor::unlock() {
+        setBrakeMode(AbstractMotor::brakeMode::coast);
+    }
+
     void PrimaryMotor::indexerPID(okapi::QAngle setpoint) {
         float error;
         float prevError;
@@ -23,6 +29,9 @@ namespace xlib {
         float iPower;
         float dPower;
         float pwr;
+
+        okapi::Timer time;
+        time.placeMark();
 
         do {
             pPower = error = setpoint.convert(okapi::degree) - getPosition();
@@ -36,6 +45,11 @@ namespace xlib {
         
             setNormalizedVelocity(std::clamp(pwr, -1.0f, 1.0f));
             pros::lcd::set_text(1, std::to_string(getPosition()));
+
+            if(time.getDtFromMark() < 500_ms) {
+                forceQuit = true;
+                break;
+            }
 
             pros::delay(20);
         } while(std::fabs(error) > 10);
@@ -53,6 +67,11 @@ namespace xlib {
                 setFlywheelVel(flywheelVel.first, -1);
             }
 
+            if(forceQuit) {
+                break;
+                forceQuit = false;
+            }
+
             pros::delay(delayPerIndex.convert(okapi::millisecond));
         }
     }
@@ -62,7 +81,7 @@ namespace xlib {
         time.placeMark();
         tarePosition();
         setNormalizedVelocity(-1);
-        while(getPosition() > -400 && time.getDtFromMark() < 500_ms) 
+        while(getPosition() > -500 && time.getDtFromMark() < 500_ms) 
             pros::delay(25);
         stop();
     }
@@ -72,7 +91,7 @@ namespace xlib {
         time.placeMark();
         tarePosition();
         setNormalizedVelocity(-1);
-        while(getPosition() > -200 && time.getDtFromMark() < 500_ms) 
+        while(getPosition() > -300 && time.getDtFromMark() < 500_ms) 
             pros::delay(25);
         stop();
     }

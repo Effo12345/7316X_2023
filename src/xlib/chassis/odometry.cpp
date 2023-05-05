@@ -1,7 +1,4 @@
 #include "xlib/chassis/odometry.hpp"
-#include "okapi/api/units/QAngle.hpp"
-#include "okapi/api/units/QLength.hpp"
-#include "okapi/api/util/mathUtil.hpp"
 
 namespace xlib {
 

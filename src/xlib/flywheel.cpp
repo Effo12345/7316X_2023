@@ -1,5 +1,4 @@
 #include "xlib/flywheel.hpp"
-#include "okapi/api/filter/emaFilter.hpp"
 
 /*
  * The flywheel class implements the Take Back Half (TBH) velocity control

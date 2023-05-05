@@ -1,8 +1,5 @@
 #include "main.h"
 #include "globals.hpp"
-#include "okapi/impl/device/controllerUtil.hpp"
-#include "pros/llemu.hpp"
-#include "xlib/chassis/extendedchassis.hpp"
 
 //Boolean flags for use in driver control
 bool fwToggle = false;
@@ -11,8 +8,8 @@ bool adjusterState = false;
 bool hasExpanded = false;
 
 //Holds the current target velocities for the flywheel
-std::pair<int, float> flywheelVel {2425, 0.866};
-std::pair<int, float> angledFlywheelVel = {2500,0.886};
+std::pair<int, float> flywheelVel {2600, 0.866};
+std::pair<int, float> angledFlywheelVel = {2700,0.9};
 std::pair<int, float> maxFlywheelVel {3600, 1.0};
 std::pair<int, float> flywheelVelocitiesL1[2] {flywheelVel, angledFlywheelVel};
 
@@ -100,11 +97,11 @@ void opcontrol() {
 		}
 
 		if(master[ControllerDigital::R2].changedToPressed()) {
-			primary.setNormalizedVelocity(1.0);
+			primary.setNormalizedVelocity(-1.0);
 		}
 		else if(master[ControllerDigital::R2].changedToReleased()) {
 			intakeState = false;
-			primary.setNormalizedVelocity(0);
+			primary.stop();
 		}
 
 		if(master[ControllerDigital::A].changedToPressed()) {
@@ -133,24 +130,18 @@ void opcontrol() {
 			lowExpansion1.toggle();
 			lowExpansion2.toggle();
 			highExpansion.toggle();
-		   }
+		}
 
 		if(master[ControllerDigital::down].changedToPressed() && !hasExpanded) {
-			hasExpanded = true;
 			lowExpansion1.toggle();
 			lowExpansion2.toggle();
 		}
 
-		if(master[ControllerDigital::left].changedToPressed())
-			autonomous();
 
 		chassis->getModel()->tank (
 			master.getAnalog(ControllerAnalog::leftY),
 			master.getAnalog(ControllerAnalog::rightY)
 		);
-
-		if(master[ControllerDigital::left].changedToPressed())
-			primary.staggeredIndex(3, 1000_ms);
 
 		pros::delay(20);
 	}

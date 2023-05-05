@@ -1,5 +1,4 @@
 #pragma once
-#include "pros/distance.hpp"
 #include "xlib/chassis/extendedchassis.hpp"
 
 namespace xlib {

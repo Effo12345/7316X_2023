@@ -1,5 +1,4 @@
 #include "utils.hpp"
-#include "okapi/api.hpp"
 
 int timer::time() {
     time_abs = pros::millis();

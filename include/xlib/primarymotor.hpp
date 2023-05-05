@@ -1,9 +1,5 @@
 #pragma once
 #include "okapi/api.hpp"
-#include "okapi/api/control/iterative/iterativePosPidController.hpp"
-#include "okapi/api/units/QAngle.hpp"
-#include "okapi/api/units/QTime.hpp"
-
 using namespace okapi::literals;
 
 namespace xlib {
@@ -19,12 +15,17 @@ namespace xlib {
 
         flywheelInterface setFlywheelVel {};
 
+        bool forceQuit = false;
+
     public:
         PrimaryMotor(const std::int8_t iport, const okapi::IterativePosPIDController::Gains& igains, const okapi::QAngle indexDistance, flywheelInterface fw);
 
         void setNormalizedVelocity(float vel);
         float getNormalizedVelocity();
         void stop();
+
+        void lock();
+        void unlock();
 
         void staggeredIndex(int timesToIndex, okapi::QTime delayPerIndex, std::pair<int, int> flywheelVel = {-1, -1});
         void rollerFlip();

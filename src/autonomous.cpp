@@ -1,5 +1,5 @@
 #include "autonomous.hpp"
-#include "globals.hpp"
+
 
 void left6Disc() {
     chassis->startOdom({-36.875, -58.375}, 0_deg);
@@ -18,9 +18,8 @@ void left6Disc() {
 		{-38.27, -67.32},
         {-43.94, -52.3}
 	}});
-	fw.moveVelocity({2700, 0.9});
+	fw.moveVelocity({2800, 0.9});
 
-	//chassis->settings.kV = 2.5;
 	chassis->settings.reversed = true;
 	chassis->followNewPath({{
 		{-44.79, -51.45},
@@ -31,7 +30,7 @@ void left6Disc() {
 	pros::delay(1500);
 	primary.staggeredIndex(3, 500_ms);
 	pros::delay(100);
-	fw.moveVelocity(2500, 0.8);
+	fw.moveVelocity(2600, 0.8);
 
 	chassis->getModel()->arcade(-0.5, 0);
 	pros::delay(150);
@@ -83,9 +82,8 @@ void left3Disc() {
 		{-38.27, -67.32},
         {-43.94, -52.3}
 	}});
-	fw.moveVelocity({2600, 0.7});
+	fw.moveVelocity({2700, 0.7});
 
-	//chassis->settings.kV = 2.5;
 	chassis->settings.reversed = true;
 	chassis->followNewPath({{
 		{-44.79, -51.45},
@@ -112,7 +110,7 @@ void leftRoller() {
 
 void right6Disc() {
     chassis->startOdom({55.9375, 6.25}, -90_deg);
-	fw.moveVelocity({2600, 0.9});
+	fw.moveVelocity({2750, 0.9});
 
 	primary.setNormalizedVelocity(1);
 	chassis->followNewPath({{
@@ -135,14 +133,10 @@ void right6Disc() {
 	(chassis->getModel())->arcade(-0.4, 0.0);
 	pros::delay(250);
 	(chassis->getModel())->stop();
-	//pros::delay(100);
 
-	fw.moveVelocity({2550, 0.877});
-	//chassis->turnToPoint({36, 11.76}, 1_s);
+	fw.moveVelocity({2700, 0.88});
 	chassis->turnToAngle(-138_deg, 500_ms);
-	//pros::delay(100);
 	
-	//chassis->settings.reversed = false;
 	chassis->followNewPath({{
 		{36, 11.76},
         {23.24, -1.56},
@@ -150,14 +144,14 @@ void right6Disc() {
 	}});
 
 	pros::delay(100);
-	chassis->turnToAngle(-43_deg, 1000_ms);
-	//pros::delay(100);
+	chassis->turnToAngle(-44_deg, 1000_ms);
 
 	primary.staggeredIndex(3, 300_ms);
 
 	chassis->turnToAngle(-135_deg, 500_ms);
 	fw.moveVelocity(0);
-	//pros::delay(100);
+	
+	
 	chassis->settings.reversed = true;
 	chassis->settings.maxAcceleration = 300;
 	chassis->settings.maxRateChange = 300;
@@ -170,7 +164,6 @@ void right6Disc() {
 	chassis->turnToAngle(-90_deg, 400_ms);
 	(chassis->getModel())->arcade(-0.7, 0);
 	pros::delay(150);
-	//(chassis->getModel())->arcade(-0.2, 0);
 	chassis->getModel()->stop();
 	primary.rollerFlip2();
 	(chassis->getModel())->stop();
@@ -180,7 +173,7 @@ void right6Disc() {
 
 void right3Disc() {
     chassis->startOdom({55.9375, 6.25}, -90_deg);
-	fw.moveVelocity({2400, 0.7});
+	fw.moveVelocity({2500, 0.7});
 
 	primary.setNormalizedVelocity(1);
 	chassis->followNewPath({{
@@ -249,7 +242,6 @@ void fullWP() {
 
 	chassis->settings.maxAcceleration = 300;
 	chassis->settings.lookaheadDistance = 15;
-	//chassis->settings.useRateLimiter = false;
 	chassis->settings.kV = 3.5;
 	chassis->followNewPath({{
 		{-41.67, -65.91},
@@ -270,7 +262,7 @@ void fullWP() {
         {-4.25, -18.57}
 	}});
 
-	chassis->turnToAngle(-45_deg, 500_ms);
+	chassis->turnToAngle(-46_deg, 500_ms);
 	primary.staggeredIndex(3, 300_ms);
 
 	fw.moveVelocity(2800, 0.87);
@@ -288,7 +280,7 @@ void fullWP() {
         {33.45, 16.87}
 	}});
 
-	chassis->turnToAngle(-75_deg, 750_ms);
+	chassis->turnToAngle(-76_deg, 750_ms);
 	primary.staggeredIndex(3, 300_ms);
 	fw.moveVelocity(0);
 

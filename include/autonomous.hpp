@@ -1,4 +1,5 @@
 #pragma once
+#include "globals.hpp"
 
 extern void left6Disc();
 extern void left3Disc();

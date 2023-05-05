@@ -1,5 +1,4 @@
 #include "xlib/chassis/extendedchassisbuilder.hpp"
-#include "okapi/impl/device/distanceSensor.hpp"
 
 namespace xlib {
 

@@ -1,12 +1,4 @@
 #include "xlib/chassis/extendedchassis.hpp"
-#include "odometry.hpp"
-#include "okapi/api/control/iterative/iterativePosPidController.hpp"
-#include "okapi/api/filter/medianFilter.hpp"
-#include "okapi/api/units/QAngle.hpp"
-#include "okapi/api/units/QLength.hpp"
-#include "okapi/impl/device/distanceSensor.hpp"
-#include <cstdint>
-#include <float.h>
 
 namespace xlib {
     /**
@@ -91,7 +83,6 @@ namespace xlib {
         //motors at a time
         motorThreadSafety.take();
 		do {
-            //TODO: IMPLEMENTATION NEEDS FIXED
             Odom::Velocity chassisVel = {leftVelocityGetter->getActualVelocity(), rightVelocityGetter->getActualVelocity()};
             chassisVel = chassisVel * drive->getGearsetRatioPair().ratio;
 

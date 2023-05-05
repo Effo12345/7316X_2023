@@ -1,10 +1,5 @@
 #pragma once
-#include "main.h"
-#include "xlib/pneumatics.hpp"
-#include "xlib/flywheel.hpp"
-#include "xlib/display/selector.hpp"
-#include "xlib/chassis/extendedchassisbuilder.hpp"
-#include "xlib/primarymotor.hpp"
+#include "xlib/api.hpp"
 #include "autonomous.hpp"
 
 //Constants

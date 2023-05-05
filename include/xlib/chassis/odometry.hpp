@@ -1,5 +1,4 @@
 #pragma once
-#include "okapi/impl/device/rotarysensor/rotationSensor.hpp"
 #include "xlib/taskwrapper.hpp"
 #include "xlib/chassis/point.hpp"
 #include "okapi/api.hpp"
