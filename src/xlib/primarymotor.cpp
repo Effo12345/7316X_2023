@@ -1,19 +1,27 @@
 #include "primarymotor.hpp"
-#include "okapi/api/device/motor/abstractMotor.hpp"
 
 namespace xlib {
+    /**
+     * @param vel Velocity on [-1, 1]
+     */
     void PrimaryMotor::setNormalizedVelocity(float vel) {
         moveVoltage(std::clamp(vel, -1.0f, 1.0f) * 12000);
     }
 
+    /**
+     * @return Velocity on [-1, 1]
+     */
     float PrimaryMotor::getNormalizedVelocity() {
         return std::clamp(static_cast<float>(getActualVelocity() / 200), -1.0f, 1.0f);
     }
 
+    //Set velocity to 0
     void PrimaryMotor::stop() {
         setNormalizedVelocity(0.0);
     }
 
+
+    //Lock/unlock the primary motor to be used as a passive roller mech
     void PrimaryMotor::lock() {
         setBrakeMode(AbstractMotor::brakeMode::brake);
     }
@@ -22,6 +30,11 @@ namespace xlib {
         setBrakeMode(AbstractMotor::brakeMode::coast);
     }
 
+    /**
+     * Run the primary motor to a target rotational positin using PID
+     * 
+     * @param setpoint Desired rotation angle (deg)
+     */
     void PrimaryMotor::indexerPID(okapi::QAngle setpoint) {
         float error;
         float prevError;
@@ -46,6 +59,7 @@ namespace xlib {
             setNormalizedVelocity(std::clamp(pwr, -1.0f, 1.0f));
             pros::lcd::set_text(1, std::to_string(getPosition()));
 
+            //Time limit index to prevent jamming and ensure roller scoring
             if(time.getDtFromMark() < 500_ms) {
                 forceQuit = true;
                 break;
@@ -57,16 +71,19 @@ namespace xlib {
         stop();
     }
 
-    void PrimaryMotor::staggeredIndex(int timesToIndex, okapi::QTime delayPerIndex, std::pair<int, int> flywheelVel) {
+    /**
+     * Call indexerPID a pre-determined number of times with a set delay between
+     * each call.
+     * 
+     * @param timesToIndex Maximum number of index attempts
+     * @param delayPerIndex Time between the start of each PID rotation
+     */
+    void PrimaryMotor::staggeredIndex(int timesToIndex, okapi::QTime delayPerIndex) {
         for(int i = 0; i < timesToIndex; i++) {
             tarePosition();
             indexerPID(distanceToIndex);
 
-            if(flywheelVel.first != -1 && i == 1) {
-                flywheelVel.first -= flywheelVel.second;
-                setFlywheelVel(flywheelVel.first, -1);
-            }
-
+            //Stop indexing and continue if the flywheel gets jammed
             if(forceQuit) {
                 break;
                 forceQuit = false;
@@ -75,6 +92,7 @@ namespace xlib {
             pros::delay(delayPerIndex.convert(okapi::millisecond));
         }
     }
+
 
     void PrimaryMotor::rollerFlip() {
         okapi::Timer time;
@@ -104,9 +122,9 @@ namespace xlib {
         stop();
     }
 
-    PrimaryMotor::PrimaryMotor(const std::int8_t iport, const okapi::IterativePosPIDController::Gains& igains, const okapi::QAngle indexDistance, flywheelInterface fw)
+    PrimaryMotor::PrimaryMotor(const std::int8_t iport, const okapi::IterativePosPIDController::Gains& igains, const okapi::QAngle indexDistance)
         : okapi::Motor{iport}, //Calls the constructor for okapi::Motor 
-          distanceToIndex{indexDistance}, setFlywheelVel{fw}
+          distanceToIndex{indexDistance}
           {
             indexerGains = std::make_shared<okapi::IterativePosPIDController::Gains>(igains);
           }

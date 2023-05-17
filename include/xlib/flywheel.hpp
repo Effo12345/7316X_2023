@@ -26,10 +26,6 @@ namespace xlib {
         Grapher grapher;
         Selector& selector;
 
-        //FILE* targetVelocityTelem = fopen("/usd/TBH/targetVelocity.txt", "w");
-        //FILE* measuredVelocityTelem = fopen("/usd/TBH/measuredVelocity.txt", "w");
-        //FILE* deltaVelocity= fopen("/usd/deltaVel.txt", "w");
-
         void loop();
 
         void init();
@@ -42,8 +38,6 @@ namespace xlib {
         void moveVelocity(std::pair<int, float> vel);
         void toggleReverse();
         void stop();
-
-        std::function<void(int, float)> getAnonymousVelocitySetter();
     };
 }
 

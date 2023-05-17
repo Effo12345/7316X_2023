@@ -1,27 +1,21 @@
 #include "xlib/chassis/extendedchassis.hpp"
 
 namespace xlib {
-    /**
-     * Takes in data from the builder and initializes any components necessary
-     * for managing chassis movement during driver control and autonomous
-     *
-     * @param ileft Left drivetrain motors
-     * @param iright Right drivetrain motors
-     * @param igearset Drivetrain external gear ratio and motor cartridge
-     * @param iscales Size of and distance to tracking wheels
-     * @param right Right (parallel) tracking wheel encoder
-     * @param middle Center (perpendicular) tracking wheel encoder
-     * @param leftVelocity Rotation sensor to measure left wheel velocity
-     * @param rightVelocity Rotation sensor to measure right wheel velocity
-     * @param inertial1 First inertial sensor to get robot's yaw
-     * @param inertial2 Second inertial sensor to get robot's yaw
-     * @param distance Distance sensor to get distance to field perimeter
-     * @param idistanceGains Translational PID controller gains
-     * @param iturnGains Rotational PID controller gains
-     * @param iangleGains Heading adjustment PID controller gains
-     * @param idistanceSensorGains Short distance PID controller gains
-     * @param set Pure pursuit tuning constants
-     */
+     /**
+      * Takes in data from the builder and initializes any components necessary
+      * for managing chassis movement during driver control and autonomous
+      * 
+      * @param ileft Left drivetrain motors
+      * @param iright Right drivetrain motors
+      * @param igearset Drivetrain external gear ratio and motor cartridge
+      * @param iscales Size of and distance to tracking wheels
+      * @param tracking Parallel tracking wheel encoder
+      * @param inertial Inertial sensor to get robot's yaw
+      * @param idistanceGains Translational PID controller gains (deprecated)
+      * @param iturnGains Rotational PID controller gains
+      * @param iangleGains Heading adjustment PID controller gains (deprecated)
+      * @param set Pure pursuit tuning constants
+      */
     ExtendedChassis::ExtendedChassis (
         const MotorGroup& ileft, const MotorGroup& iright, 
         const AbstractMotor::GearsetRatioPair& igearset, const ChassisScales& iscales,
@@ -43,7 +37,7 @@ namespace xlib {
         headingPID = std::make_shared<IterativePosPIDController>(iangleGains, TimeUtilFactory::createDefault());
     }
 
-    /*
+    /**
      * Start odometer's internal thread
      */
     void ExtendedChassis::startOdom(QPoint ipos, QAngle iheading) {
@@ -51,7 +45,7 @@ namespace xlib {
         odometer.startLoop();
     }
 
-    /*
+    /**
      * Stop odometer's internal thread
      */
     void ExtendedChassis::stopOdom() {
@@ -89,7 +83,7 @@ namespace xlib {
             chassisVel.leftVel = leftFilter.filter(chassisVel.leftVel);
             chassisVel.rightVel = rightFilter.filter(chassisVel.rightVel);
 
-			Odom::Velocity vel = pathFollower.step(odometer.getRawPos(), chassisVel);
+			Odom::Velocity vel = pathFollower.step(odometer.getPos(), chassisVel);
 			(drive->getModel())->tank(vel.leftVel, vel.rightVel);
 
 			pros::delay(25);
@@ -100,7 +94,7 @@ namespace xlib {
 
     /**
      * Turns to face a point on the field based on the robot's current position
-     * using the dot product angle formula.
+     * using the dot product angle formula. Not fully tested with one wheel odom
      *
      * @param ipoint Point to turn towards
      * @param time Force-quit time limit
@@ -108,7 +102,7 @@ namespace xlib {
      */
     void ExtendedChassis::turnToPoint(QPoint ipoint, QTime time, bool ireversed) {
         //Find the target delta heading
-        Odom::QPos pos = odometer.getRawPos();
+        Odom::QPos pos = odometer.getPos();
         QPoint headingVector {cos(pos.a), sin(pos.a)};
         QPoint adjustedPoint {ipoint.y * -1, ipoint.x};
 
@@ -117,22 +111,14 @@ namespace xlib {
         //Find angle between vectors using cross product formula
         float targetHeading = acos(headingVector.dotProduct(targetVector) / (headingVector.getMagnitude() * targetVector.getMagnitude()));
 
-        std::string angleOutput = "Angle size: " + std::to_string((targetHeading * radian).convert(degree));
-        pros::lcd::set_text(5, angleOutput);
 
         int side = sgn(((-1 * headingVector.y) * targetVector.x) + (headingVector.x * targetVector.y));
         targetHeading = (pos.a) + (targetHeading * side);
 
-        if(!ireversed)
+        if(ireversed)
             targetHeading += okapi::pi;
-
-        std::string targetOutput = "Target heading: " + std::to_string((targetHeading * radian).convert(degree));
-        pros::lcd::set_text(6, targetOutput);
-
-        std::string headingOutput = "Side: " + std::to_string(side);
-        pros::lcd::set_text(7, headingOutput);
         
-        turnToAngle(-1 * targetHeading * radian, time);
+        turnToAngle(targetHeading * radian, time);
     }
 
     /**
@@ -144,22 +130,18 @@ namespace xlib {
     void ExtendedChassis::turnToAngle(QAngle targetAngle, QTime time) {
         turnPID->reset();
         turnPID->setTarget(0);
-        //turnPID->setIntegratorReset(true);
-        //turnPID->setIntegralLimits(0.4 / 0.015, -0.4 / 0.015);
-        //turnPID->setErrorSumLimits(15, 0);
 
         auto timer = TimeUtilFactory().createDefault().getTimer();
         timer->placeMark();
         motorThreadSafety.take();
 
         do {
-            (drive->getModel())->arcade(0, std::clamp(turnPID->step(-rescale180(targetAngle.convert(degree)- odometer.getRawPos().a)), -PIDvelocityLimit, PIDvelocityLimit));
+            (drive->getModel())->arcade(0, std::clamp(turnPID->step(-rescale180(targetAngle.convert(degree)- odometer.getPos().a)), -PIDvelocityLimit, PIDvelocityLimit));
             pros::delay(10);
         }while(!turnPID->isSettled() && timer->getDtFromMark() < time);
 
         (drive->getModel())->stop();
         (drive->getModel())->resetSensors();
-        relativeTrackingDistance = odometer.getTrack();
         motorThreadSafety.give();
     }
 
@@ -169,6 +151,9 @@ namespace xlib {
      * @param target Distance to drive (typically in inches)
      * @param time Time limit if the loop doesn't reach the target value
      */
+     //Thought I'd leave this here for anyone that wants it.
+     //NOT FUNCTIONAL in the current build
+    /*
     void ExtendedChassis::driveDistance(QLength target, QTime time) {
         movePID->reset();
         headingPID->reset();
@@ -190,6 +175,7 @@ namespace xlib {
         (drive->getModel())->stop();
         motorThreadSafety.give();
     }
+    */
 
     void ExtendedChassis::setPIDVelocityLimit(double velLimit) {
         PIDvelocityLimit = std::clamp(velLimit, 0.0, 1.0);

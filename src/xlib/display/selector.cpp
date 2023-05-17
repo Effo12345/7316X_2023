@@ -157,5 +157,4 @@ namespace xlib {
         backButton.setHidden(!istate);
         lv_obj_set_hidden(autonName, !istate);
     }
-
 }

@@ -1,6 +1,5 @@
 #include "autonomous.hpp"
 
-
 void left6Disc() {
     chassis->startOdom({-36.875, -58.375}, 0_deg);
 
@@ -65,6 +64,7 @@ void left6Disc() {
     chassis->stopOdom();
 }
 
+
 void left3Disc() {
     chassis->startOdom({-36.875, -58.375}, 0_deg);
 
@@ -95,11 +95,12 @@ void left3Disc() {
 	pros::delay(600);
 	chassis->getModel()->stop();
 	pros::delay(2400);
-	primary.staggeredIndex(3, 1000_ms, {2600, 100});
+	primary.staggeredIndex(3, 1000_ms);
 	fw.moveVelocity(0);
 
     chassis->stopOdom();
 }
+
 
 void leftRoller() {
     (chassis->getModel())->arcade(-0.5, 0);
@@ -107,6 +108,7 @@ void leftRoller() {
 	(chassis->getModel())->arcade(0, 0);
 	primary.rollerFlip2();
 }
+
 
 void right6Disc() {
     chassis->startOdom({55.9375, 6.25}, -90_deg);
@@ -171,6 +173,7 @@ void right6Disc() {
     chassis->stopOdom();
 }
 
+
 void right3Disc() {
     chassis->startOdom({55.9375, 6.25}, -90_deg);
 	fw.moveVelocity({2500, 0.7});
@@ -206,6 +209,7 @@ void right3Disc() {
     chassis->stopOdom();
 }
 
+
 void rightRoller() {
     chassis->startOdom({55.9375, 6.25}, -90_deg);
 	chassis->turnToAngle(-180_deg, 1_s);
@@ -229,6 +233,7 @@ void rightRoller() {
 
     chassis->stopOdom();
 }
+
 
 void fullWP() {
     chassis->startOdom({-36.875, -58.375}, 0_deg);

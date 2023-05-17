@@ -46,7 +46,7 @@ namespace xlib {
 	 *
 	 * @param path Input points to be processed
 	 * @param weight_smooth Determines the cuviness of the path
-	 * @param Tolerance The maximum permissible slope between two points
+	 * @param tolerance The maximum permissible slope between two points
 	 */
     void PathGenerator::optimizePath(QPath& path, const float weight_smooth, const float tolerance) {
 		const float weight_data = 1 - weight_smooth;

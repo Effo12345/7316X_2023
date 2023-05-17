@@ -44,16 +44,13 @@ namespace xlib {
         return *this;
     }
 
-    /**
-     * Sets all sensors used in odometry and pure pursuit
-     *
-     * @param iright The right (parallel) encoder
-     * @param imiddle The middle (perpendicular) encoder
-     * @param ileftVelocity Rotation sensor to measure left driven wheel speed
-     * @param irightVelocity Rotation sensor to measure right driven wheel speed
-     * @param inertial Inertial sensor to measure robot's heading
-     * @return An ongoing builder
-     */
+     /**
+      * Sets all sensors used in odometry and pure pursuit
+      * 
+      * @param itracking Tracking wheel (parallel) to measure arc length
+      * @param inertial Inertial sensor to measure robot's heading
+      * @return ExtendedChassisBuilder& 
+      */
     ExtendedChassisBuilder& ExtendedChassisBuilder::withSensors(const ADIEncoder& itracking,
                                         const IMU& inertial) {
         tracking = std::make_shared<ADIEncoder>(itracking);

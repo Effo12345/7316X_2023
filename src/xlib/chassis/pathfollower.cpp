@@ -106,17 +106,8 @@ namespace xlib {
         float targetHeading = std::acos(std::clamp(headingVector.dotProduct(lookaheadVector) / lookaheadVectorMagnitude, -1.0f, 1.0f));
 
         //Find whether turn is to the left or right (negative or positive)
-        //TODO: multiply by -1
         int side = sgn(((-1 * headingVector.y) * lookaheadVector.x) + (headingVector.x * lookaheadVector.y)) * -1;
-
-        //TODO: Change this to sin
         float x = sin(targetHeading) * lookaheadVectorMagnitude;
-
-        if(std::isnan(side * (2 * x) / pow(lookaheadDistance, 2))) {
-            std::string badCurve = "Bad curvature: " + std::to_string(side * (2 * x) / pow(lookaheadDistance, 2)); // + "\nTarget: " + std::to_string(targetHeading) + "\nSide: " + std::to_string(side) + "\nLookahead: " + std::to_string(lookaheadVectorMagnitude) + "\nHeaingVector: " + headingVector.toString() + "\nLookaheadVector: " + lookaheadVector.toString() + "\nDotProduct: " + std::to_string(dotProduct) + "\nErrno: " + strerror(errno) + "\naCos: " + std::to_string(headingVector.dotProduct(lookaheadVector) / lookaheadVectorMagnitude);
-            throw std::runtime_error(badCurve);
-            
-        }
 
         return side * (2 * x) / pow(lookaheadDistance, 2);
     }
@@ -187,16 +178,10 @@ namespace xlib {
         Odom::Velocity targetVelocities = calculateWheelVelocities(targetVelocity, curvature, settings->trackWidth, settings->reversed);
 
         //Control wheel velocities using velocity PID (loop must run every 25 msec)
-        Odom::Velocity feedForward {(settings->kV * targetVelocities.leftVel) + (settings->kA * ((targetVelocities.leftVel - lastVelocities.leftVel) / 0.025)),
-                                    (settings->kV * targetVelocities.rightVel) + (settings->kA * ((targetVelocities.rightVel - lastVelocities.rightVel) / 0.025))};
-
-        Odom::Velocity feedF = (targetVelocities * settings->kV) + (((targetVelocities - lastVelocities) / 0.025) * settings->kA);
+        Odom::Velocity feedForward = (targetVelocities * settings->kV) + (((targetVelocities - lastVelocities) / 0.025) * settings->kA);
         lastVelocities = targetVelocities;
 
-        Odom::Velocity feedBack {settings->kP * (targetVelocities.leftVel - measuredVel.leftVel),
-                                settings->kP * (targetVelocities.rightVel - measuredVel.rightVel)};
-
-        Odom::Velocity feedB = (targetVelocities - measuredVel) * settings->kP;
+        Odom::Velocity feedBack = (targetVelocities - measuredVel) * settings->kP;
 
         //grapher.newData(targetVelocities.leftVel, 0);
         //grapher.newData(measuredVel.leftVel, 1);

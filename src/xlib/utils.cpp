@@ -15,8 +15,7 @@ void timer::reset() {
 float rateLimiter::constrain(float input, float maxRateChange) {
     float maxChange = (0.025) * maxRateChange;
     float temp = input - output;
-
-    temp = (temp < -maxChange) ? -maxChange : (temp > maxChange) ? maxChange : temp;
+    temp = std::clamp(temp, -maxChange, maxChange);
 
     clock.reset();
     output += temp;

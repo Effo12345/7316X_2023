@@ -64,16 +64,11 @@ private:
     double degToIn(double deg);
     double DPSToRPM(double dps);
 
-    double average(std::vector<double> n);
-
     void loop();
 
 public:
     QPos getPos();
-    QPos getRawPos();
     void setPos(QPoint ipos, QAngle iheading);
-
-    QLength getTrack();
 
     double getInternalIMU();
 

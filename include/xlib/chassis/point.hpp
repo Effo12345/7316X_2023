@@ -7,9 +7,6 @@ namespace xlib {
 		float x;
 		float y;
 
-		//Overload output operator
-		friend std::ostream& operator<<(std::ostream& out, const QPoint& p);
-
 		//Overload math operators to interact with other point objects and with
 		//scalar values
 		QPoint operator+(const QPoint& p) {

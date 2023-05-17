@@ -6,7 +6,7 @@ template <typename T> int sgn(T val) {
     return (T(0) < val) - (val < T(0));
 }
 
-//Class to hold any necessary timing values
+//Legacy timer class
 class timer {
   int prevTime = pros::millis();
   int time_abs;
